@@ -2,7 +2,7 @@
 
 global  GLCD_Setup, GLCD_Write_Data, GLCD_T, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M
+global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
     
 psect	udata_acs   ; named variables in access ram
@@ -10,18 +10,20 @@ GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
 GLCD_cnt_h:	ds 1	; reserve 1 byte for variable LCD_cnt_h
 GLCD_cnt_ms:	ds 1	; reserve 1 byte for ms counter
 GLCD_tmp:	ds 1	; reserve 1 byte for temporary use
-GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
-GLCD_counterx:  ds 1	;
+GLCD_loc:	ds 1	; reserve 1 byte to track y position
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
-
+GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
+GLCD_counterx:  ds 1	;
+    
 	GLCD_CS1 EQU 0	; column left
 	GLCD_CS2 EQU 1	; column right
     	GLCD_RS	EQU 2	; LCD register select bit
 	GLCD_RW EQU 3
 	GLCD_E	EQU 4	; LCD enable bit
 	RST EQU	5
+
 
 psect	glcd_code,class=CODE
     
@@ -94,6 +96,7 @@ GLCD_x_Loop:
 	return
 
 GLCD_Write_Data:
+	incf	GLCD_loc, A
 	movwf	LATD, A
 	bsf	LATB, GLCD_RS, A    ; take RS high (select data register)
 	bcf	LATB, GLCD_RW, A    ; take RW low (select write operation)
@@ -132,6 +135,7 @@ GLCD_Set_Page:
 	return
     
 GLCD_Set_Y:
+	movwf	GLCD_loc, A
 	movwf	GLCD_tmp, A
 	movlw	01000000B
 	addwf	GLCD_tmp, W, A
@@ -295,6 +299,19 @@ GLCD_M:
 	movlw	00000010B
 	call	GLCD_Write_Data
 	movlw	00011111B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_axis:
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00000001B
 	call	GLCD_Write_Data
 	return
 	
