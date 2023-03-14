@@ -1,6 +1,10 @@
 #include <xc.inc>
 
-global  GLCD_Setup, GLCD_Write_Data
+global  GLCD_Setup, GLCD_Write_Data, GLCD_T, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
+global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
+global	GLCD_Space, GLCD_e, GLCD_i
+global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+    
 psect	udata_acs   ; named variables in access ram
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
 GLCD_cnt_h:	ds 1	; reserve 1 byte for variable LCD_cnt_h
@@ -116,7 +120,6 @@ GLCD_Instruction:
 	bsf	LATB, GLCD_RW, A
 	movlw	1
 	call	GLCD_delay_x4us
-	call	GLCD_delay_x4us
 	return
 	
 GLCD_Set_Page:
@@ -219,6 +222,163 @@ glcdlp1:	decf 	GLCD_cnt_l, F, A	; no carry when 0x00 -> 0xff
 	subwfb 	GLCD_cnt_h, F, A	; no carry when 0x00 -> 0xff
 	bc 	glcdlp1		; carry, then loop again
 	return			; carry reset so return
+
+GLCD_T:
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00000001B
+	call	GLCD_Write_Data
+	return
+
+GLCD_m:
+	movlw	00011100B
+	call	GLCD_Write_Data
+	movlw	000000100B
+	call	GLCD_Write_Data
+	movlw	00011100B
+	call	GLCD_Write_Data
+	movlw	000000100B
+	call	GLCD_Write_Data
+	movlw	00011100B
+	call	GLCD_Write_Data
+	return
+
+GLCD_p:
+	movlw	01111100B
+	call	GLCD_Write_Data
+	movlw	00010100B
+	call	GLCD_Write_Data
+	movlw	00011100B
+	call	GLCD_Write_Data
+	return	
+	
+GLCD_c:
+	movlw	00001100B
+	call	GLCD_Write_Data
+	movlw	00010010B
+	call	GLCD_Write_Data
+	movlw	00010010B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_i:
+	movlw	00011101B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_e:
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00010111B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_Space:
+	movwf	GLCD_cnt_ms, A
+space_loop:
+	movlw	0x0
+	call	GLCD_Write_Data
+	decfsz	GLCD_cnt_ms, A
+	bra	space_loop
+	return
+	
+GLCD_1:
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010000B
+	call	GLCD_Write_Data
+	return
+
+GLCD_2:
+	movlw	00011101B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00010111B
+	call	GLCD_Write_Data
+	return
+
+GLCD_3:
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	return
+
+GLCD_4:
+	movlw	00000111B
+	call	GLCD_Write_Data
+	movlw	00000100B
+	call	GLCD_Write_Data
+	movlw	00011110B
+	call	GLCD_Write_Data
+	return
+
+GLCD_5:	
+	movlw	00010111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011101B
+	call	GLCD_Write_Data
+	return
+
+GLCD_6:
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011101B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_7:
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00011001B
+	call	GLCD_Write_Data
+	movlw	00000111B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_8:	
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	return
+
+GLCD_9:
+	movlw	00000111B
+	call	GLCD_Write_Data
+	movlw	00000101B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	return
+	
+GLCD_0:
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	return
 
 end
 

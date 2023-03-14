@@ -1,24 +1,84 @@
 	#include <xc.inc>
+extrn  GLCD_Setup, GLCD_Write_Data, GLCD_T, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
+extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
+extrn	GLCD_Space, GLCD_i, GLCD_e
+extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 
 psect	code, abs
 	
 main:
 	org	0x0
-	goto	start
+	goto	setup
 
 	org	0x100		    ; Main code starts here at address 0x100
-start:
-	movlw 	0x0
-	movwf	TRISB, A	    ; Port C all outputs
-	bra 	test
-loop:
-	movff 	0x06, PORTB
-	incf 	0x06, W, A
-test:
-	movwf	0x06, A	    ; Test for end of loop condition
-	movlw 	0x62
-	cpfsgt 	0x06, A
-	bra 	loop		    ; Not yet finished goto start of loop again
-	goto 	0x0		    ; Re-run program from start
+setup:
+	call	GLCD_Setup
+	call	GLCD_Right
+	movlw	0x28
+	call	GLCD_Set_Y
+graph:
+	call	GLCD_T
+	call	GLCD_m
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_p
+	;movlw	3
+	;call	GLCD_Space
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_Write_Data
+	call	GLCD_Write_Data
+	call	GLCD_c
+time:
+	call	GLCD_Left
+	movlw	3
+	call	GLCD_Set_Y
+	call	GLCD_T
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_i
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_m
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_e
+numbers:
+	movlw	1
+	call	GLCD_Set_Page
+	movlw	0
+	call	GLCD_Set_Y
+	call	GLCD_0
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_1
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_2
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_3
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_4
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_5
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_6
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_7
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_8
+	movlw	0x0
+	call	GLCD_Write_Data
+	call	GLCD_9
+	
+wait:	
+	movlw	10
+	bra	wait
 
 	end	main
