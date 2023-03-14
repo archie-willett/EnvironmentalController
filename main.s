@@ -1,7 +1,7 @@
 	#include <xc.inc>
 extrn  GLCD_Setup, GLCD_Write_Data, GLCD_T, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-extrn	GLCD_Space, GLCD_i, GLCD_e
+extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M
 extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 
 psect	code, abs
@@ -36,13 +36,13 @@ time:
 	call	GLCD_T
 	movlw	0x0
 	call	GLCD_Write_Data
-	call	GLCD_i
+	call	GLCD_I
 	movlw	0x0
 	call	GLCD_Write_Data
-	call	GLCD_m
+	call	GLCD_M
 	movlw	0x0
 	call	GLCD_Write_Data
-	call	GLCD_e
+	call	GLCD_lE
 numbers:
 	movlw	1
 	call	GLCD_Set_Page
