@@ -1,8 +1,9 @@
 	#include <xc.inc>
 extrn  GLCD_Setup, GLCD_Write_Data, GLCD_Tt, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb, GLCD_Bar
+extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb ; GLCD_Bar
 extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+extrn	GLCD_Compare
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 page_counter:	ds 1	; reserve 1 byte for counting through nessage	
@@ -37,7 +38,7 @@ Axis_Loop:
 	movlw	0
 	call	GLCD_Set_Y
 	call	GLCD_axis
-	incf	page_counter
+	incf	page_counter, A
 	movlw	7
 	cpfseq	page_counter, A
 	bra	Axis_Loop
@@ -82,48 +83,48 @@ bar:
 
 	movlw	9
 	call	GLCD_Set_Y
-	
-	call    GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	call	GLCD_Right  ;changing half increments page
-	movlw	0   
-	call	GLCD_Set_Y
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	;call	GLCD_Bar
+	call	GLCD_Compare
+;	call    GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	call	GLCD_Right  ;changing half increments page
+;	movlw	0   
+;	call	GLCD_Set_Y
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	call	GLCD_Bar
+;	movlw	0
+;	call	GLCD_Write_Data
+;	call	GLCD_Write_Data
+;	;call	GLCD_Bar
 
 	
 wait:	

@@ -2,8 +2,9 @@
 
 global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt, GLCD_Bar
+global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+global	GLCD_Compare
     
 psect	udata_acs   ; named variables in access ram
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
@@ -14,8 +15,11 @@ GLCD_loc:	ds 1	; reserve 1 byte to track y position
 GLCD_bar_loc:	ds 1	; reserve 1 byte to track beginning of bar
 GLCD_comp_h:	ds 1
 GLCD_comp_l:	ds 1
-GLCD_page_number:   ds 1
+temp_hex_h:	ds 1
+temp_hex_l:	ds 1
+GLCD_comp_counter:   ds 1
 GLCD_graph_line:    ds 1
+GLCD_bar_height:    ds 1
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
@@ -431,75 +435,99 @@ GLCD_0:
 	movlw	11111000B
 	call	GLCD_Write_Data
 	return
-	
 
-GLCD_Bar:
-	;movwf	bar_height, A
-	movff	GLCD_loc, GLCD_bar_loc, A
-	movlw	6
-	call	GLCD_Set_Page
+GLCD_Partial_Bar:
+	movwf	GLCD_bar_height, A
 	movlw	9
 	movwf	GLCD_counterx, A
 GLCD_Bar_Loop:
-	movlw	0xff
+	movf	GLCD_bar_height, W, A
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Bar_Loop
-New_Page:
-	movlw	5
-	call	GLCD_Set_Page
-	movf	GLCD_bar_loc, W, A
-	call	GLCD_Set_Y
+	return
+	
+GLCD_Full_Bar:
 	movlw	9
 	movwf	GLCD_counterx, A
-GLCD_Bar_Loop2:
+GLCD_Full_Bar_Loop:
 	movlw	0xff
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
-	bra	GLCD_Bar_Loop2
+	bra	GLCD_Full_Bar_Loop
 	return
 
 GLCD_Compare:
-	movlw	0x00
+    	movlw	0x01
+	movwf	temp_hex_h, A
+	movlw	0x0E
+	movwf	temp_hex_l, A
+	movff	GLCD_loc, GLCD_bar_loc, A
+	movlw	0x6E
 	movwf	GLCD_comp_l, A
-	movwf	GLCD_comp_h, A
+	clrf	GLCD_comp_h, A
 	movlw	0x07
-	movwf	GLCD_comp_counter
+	movwf	GLCD_comp_counter, A
 GLCD_Compare_Loop:
 	decf	GLCD_comp_counter, F, A
-	movlw	0xF4
+	movlw	0x32
 	addwf	GLCD_comp_l, F, A
-	movlw	0x01
+	movlw	0x00
 	addwfc	GLCD_comp_h, F, A
-	movf	GLCD_comp_h, A
-	cpfslt	;   ADC temperature higher byte (hex)
-	bra	GLCD_Print_Full_Bar
-	cpfslt	;   ADC temperature lower byte (hex)
+	movf	GLCD_comp_h, W, A
+	cpfsgt	temp_hex_h, A	    ;   ADC temperature higher byte (hex)
+	goto	GLCD_Compare_Loop_Lower
+	call	GLCD_Print_Full_Bar
+	bra	GLCD_Compare_Loop
+GLCD_Compare_Loop_Lower:
+	movf	GLCD_comp_l, W, A
+	cpfslt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
 	bra	GLCD_Print_Full_Bar
 GLCD_Compare_Small:
-	movf	GLCD_comp_l, A
-	subwf	; ADC temperature lower byte (hex), F, A
-	movf	GLCD_comp_h, A
-	subwfb	; ADC temperature higher byte (hex), F, A
+	movlw	0x32		    
+	subwf	GLCD_comp_l, W, A   ; does not work in case < 0x32
+	subwf	temp_hex_l, F, A    ; which leads to issues with carry bits
+	movf	GLCD_comp_h, W, A
+	subwfb	temp_hex_h, F, A
 	clrf	GLCD_comp_h, A
-	movlw	0x32
+	movlw	0x05
 	movwf	GLCD_comp_l, A
 	movlw	00000000B
-	movwf	GLCD_graph_line
-	cpfsgt	; ADC temperature higher byte remainder
+	movwf	GLCD_graph_line, A
+	cpfsgt	temp_hex_h, A
 	bra	GLCD_Compare_Remainder_Lower
 	bra	GLCD_Compare_Small_Loop
 GLCD_Compare_Remainder_Lower:
-	cpfsgt	; ADC temperature lower byte remainder
+	cpfsgt	temp_hex_l, A
 	return
 GLCD_Compare_Small_Loop:
 	movlw	00000001B
 	addwf	GLCD_graph_line, F, A
-	
-GLCD_Print_Full_Bar:
-	movf	GLCD_comp_counter, A
+	rrncf	GLCD_graph_line, F, A
+	movlw	0x05
+	addwf	GLCD_comp_l, F, A
+	movlw	0x00
+	addwfc	GLCD_comp_h, F, A
+	movf	GLCD_comp_h, W, A
+	cpfslt	temp_hex_h, A
+	bra	GLCD_Compare_Small_Loop
+	movf	GLCD_comp_l, W, A
+	cpfslt	temp_hex_l, A
+	bra	GLCD_Compare_Small_Loop
+	movf	GLCD_comp_counter, W, A
 	call	GLCD_Set_Page
-	call	GLCD_Full_Bar ; does not currently exist, prints one full block
+	movf	GLCD_bar_loc, W, A  ; not sure if you already did this
+	call	GLCD_Set_Y  ; sets Y location to the same as start of bar
+	movf	GLCD_graph_line, W, A
+	call	GLCD_Partial_Bar
+	return
+
+GLCD_Print_Full_Bar:
+	movf	GLCD_comp_counter, W, A
+	call	GLCD_Set_Page
+	movf	GLCD_bar_loc, W, A  ; not sure if you already did this
+	call	GLCD_Set_Y  ; sets Y location to the same as start of bar
+	call	GLCD_Full_Bar ; prints one full block
 	bra	GLCD_Compare_Loop
 
 end
