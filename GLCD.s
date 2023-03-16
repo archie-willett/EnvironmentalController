@@ -12,6 +12,10 @@ GLCD_cnt_ms:	ds 1	; reserve 1 byte for ms counter
 GLCD_tmp:	ds 1	; reserve 1 byte for temporary use
 GLCD_loc:	ds 1	; reserve 1 byte to track y position
 GLCD_bar_loc:	ds 1	; reserve 1 byte to track beginning of bar
+GLCD_comp_h:	ds 1
+GLCD_comp_l:	ds 1
+GLCD_page_number:   ds 1
+GLCD_graph_line:    ds 1
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
@@ -454,6 +458,49 @@ GLCD_Bar_Loop2:
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Bar_Loop2
 	return
+
+GLCD_Compare:
+	movlw	0x00
+	movwf	GLCD_comp_l, A
+	movwf	GLCD_comp_h, A
+	movlw	0x07
+	movwf	GLCD_comp_counter
+GLCD_Compare_Loop:
+	decf	GLCD_comp_counter, F, A
+	movlw	0xF4
+	addwf	GLCD_comp_l, F, A
+	movlw	0x01
+	addwfc	GLCD_comp_h, F, A
+	movf	GLCD_comp_h, A
+	cpfslt	;   ADC temperature higher byte (hex)
+	bra	GLCD_Print_Full_Bar
+	cpfslt	;   ADC temperature lower byte (hex)
+	bra	GLCD_Print_Full_Bar
+GLCD_Compare_Small:
+	movf	GLCD_comp_l, A
+	subwf	; ADC temperature lower byte (hex), F, A
+	movf	GLCD_comp_h, A
+	subwfb	; ADC temperature higher byte (hex), F, A
+	clrf	GLCD_comp_h, A
+	movlw	0x32
+	movwf	GLCD_comp_l, A
+	movlw	00000000B
+	movwf	GLCD_graph_line
+	cpfsgt	; ADC temperature higher byte remainder
+	bra	GLCD_Compare_Remainder_Lower
+	bra	GLCD_Compare_Small_Loop
+GLCD_Compare_Remainder_Lower:
+	cpfsgt	; ADC temperature lower byte remainder
+	return
+GLCD_Compare_Small_Loop:
+	movlw	00000001B
+	addwf	GLCD_graph_line, F, A
+	
+GLCD_Print_Full_Bar:
+	movf	GLCD_comp_counter, A
+	call	GLCD_Set_Page
+	call	GLCD_Full_Bar ; does not currently exist, prints one full block
+	bra	GLCD_Compare_Loop
 
 end
 
