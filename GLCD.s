@@ -79,7 +79,7 @@ GLCD_Loop:
 	movlw	1		; wait 40us
 	call	GLCD_delay_x4us
 	call	GLCD_Clear_x
-	incf	GLCD_countery
+	incf	GLCD_countery, A
 	movlw	8
 	cpfseq	GLCD_countery, A
 	bra	GLCD_Loop
