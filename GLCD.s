@@ -1,8 +1,8 @@
 #include <xc.inc>
 
-global  GLCD_Setup, GLCD_Write_Data, GLCD_T, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
+global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis
+global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt, GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
     
 psect	udata_acs   ; named variables in access ram
@@ -11,6 +11,7 @@ GLCD_cnt_h:	ds 1	; reserve 1 byte for variable LCD_cnt_h
 GLCD_cnt_ms:	ds 1	; reserve 1 byte for ms counter
 GLCD_tmp:	ds 1	; reserve 1 byte for temporary use
 GLCD_loc:	ds 1	; reserve 1 byte to track y position
+GLCD_bar_loc:	ds 1	; reserve 1 byte to track beginning of bar
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
@@ -227,7 +228,7 @@ glcdlp1:	decf 	GLCD_cnt_l, F, A	; no carry when 0x00 -> 0xff
 	bc 	glcdlp1		; carry, then loop again
 	return			; carry reset so return
 
-GLCD_T:
+GLCD_Tt:
 	movlw	00000001B
 	call	GLCD_Write_Data
 	movlw	00000001B
@@ -240,6 +241,19 @@ GLCD_T:
 	call	GLCD_Write_Data
 	return
 
+GLCD_Tb:
+	movlw	00001000B
+	call	GLCD_Write_Data
+	movlw	00001000B
+	call	GLCD_Write_Data
+	movlw	11111000B
+	call	GLCD_Write_Data
+	movlw	00001000B
+	call	GLCD_Write_Data
+	movlw	00001000B
+	call	GLCD_Write_Data
+	return
+	
 GLCD_m:
 	movlw	00011100B
 	call	GLCD_Write_Data
@@ -276,29 +290,29 @@ GLCD_c:
 	return
 
 GLCD_I:
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
 	return	
 	
 GLCD_lE:
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
-	movlw	00010101B
+	movlw	10101000B
 	call	GLCD_Write_Data
-	movlw	00010101B
+	movlw	10101000B
 	call	GLCD_Write_Data
 	return
 	
 GLCD_M:
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
-	movlw	00000010B
+	movlw	00010000B
 	call	GLCD_Write_Data
-	movlw	00011100B
+	movlw	11100000B
 	call	GLCD_Write_Data
-	movlw	00000010B
+	movlw	00010000B
 	call	GLCD_Write_Data
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
 	return
 	
@@ -406,12 +420,39 @@ GLCD_9:
 	return
 	
 GLCD_0:
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
-	movlw	00010001B
+	movlw	10001000B
 	call	GLCD_Write_Data
-	movlw	00011111B
+	movlw	11111000B
 	call	GLCD_Write_Data
+	return
+	
+
+GLCD_Bar:
+	;movwf	bar_height, A
+	movff	GLCD_loc, GLCD_bar_loc, A
+	movlw	6
+	call	GLCD_Set_Page
+	movlw	9
+	movwf	GLCD_counterx, A
+GLCD_Bar_Loop:
+	movlw	0xff
+	call	GLCD_Write_Data
+	decfsz	GLCD_counterx, A
+	bra	GLCD_Bar_Loop
+New_Page:
+	movlw	5
+	call	GLCD_Set_Page
+	movf	GLCD_bar_loc, W, A
+	call	GLCD_Set_Y
+	movlw	9
+	movwf	GLCD_counterx, A
+GLCD_Bar_Loop2:
+	movlw	0xff
+	call	GLCD_Write_Data
+	decfsz	GLCD_counterx, A
+	bra	GLCD_Bar_Loop2
 	return
 
 end
