@@ -89,9 +89,29 @@ bar:
 	;call	DCon4Dig
 	;call	UART_Send_Temperature
 	call	Avg16val_and_Calibrate
-	;call	GLCD_Compare
-	call	DCon4Dig
-	call	UART_Send_Temperature
+	call	GLCD_Compare
+	;call	DCon4Dig
+	;call	UART_Send_Temperature
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	GLCD_Right
+	movlw	0
+	call	GLCD_Set_Y
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	call	Avg16val_and_Calibrate
+	call	GLCD_Compare
+	goto bar
 	
 wait:	
 	movlw	10
