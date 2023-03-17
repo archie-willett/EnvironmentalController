@@ -485,15 +485,12 @@ GLCD_Compare_Loop_Lower:
 	bra	GLCD_Print_Full_Bar
 GLCD_Compare_Small:
 	movlw	0x32		    
-	subwf	GLCD_comp_l, W, A   ; does not work in case < 0x32
-	subwf	temp_hex_l, F, A    ; which leads to issues with carry bits
-	movf	GLCD_comp_h, W, A
-	subwfb	temp_hex_h, F, A
-	clrf	GLCD_comp_h, A
-	movlw	0x05
-	movwf	GLCD_comp_l, A
+	subwf	GLCD_comp_l, F, A   
+	movlw	0x00
+	subwfb	GLCD_comp_h, F, A
 	movlw	00000000B
 	movwf	GLCD_graph_line, A
+	movf	GLCD_comp_h, W, A
 	cpfsgt	temp_hex_h, A
 	bra	GLCD_Compare_Remainder_Lower
 	bra	GLCD_Compare_Small_Loop
