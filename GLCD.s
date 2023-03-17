@@ -4,7 +4,7 @@ global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
-global	GLCD_Compare
+global	GLCD_Compare, GLCD_Full_Bar
     
 psect	udata_acs   ; named variables in access ram
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
