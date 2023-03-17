@@ -4,7 +4,8 @@ extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb ; GLCD_Bar
 extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 extrn	GLCD_Compare, GLCD_Full_Bar, Avg16val_and_Calibrate
-extrn	h1, l1
+extrn	DCon4Dig
+extrn	UART_Send_Temperature
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 page_counter:	ds 1	; reserve 1 byte for counting through nessage	
@@ -81,13 +82,16 @@ time:
 	call	GLCD_lE
 bar:
 	call	GLCD_Left
-
 	movlw	9
 	call	GLCD_Set_Y
 	call	Avg16val_and_Calibrate
+	call	DCon4Dig
+	call	UART_Send_Temperature
 	call	GLCD_Compare
 	call	Avg16val_and_Calibrate
 	call	GLCD_Compare
+	call	DCon4Dig
+	call	UART_Send_Temperature
 	
 wait:	
 	movlw	10
