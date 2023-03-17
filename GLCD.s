@@ -6,6 +6,8 @@ global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 global	GLCD_Compare, GLCD_Full_Bar
     
+extrn	h1, l1
+    
 psect	udata_acs   ; named variables in access ram
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
 GLCD_cnt_h:	ds 1	; reserve 1 byte for variable LCD_cnt_h
@@ -464,9 +466,9 @@ GLCD_Full_Bar_Loop:
 	return
 
 GLCD_Compare:
-    	movlw	0x01
+    	movf	h1, W, A
 	movwf	temp_hex_h, A
-	movlw	0x0E
+	movf	l1, W, A
 	movwf	temp_hex_l, A
 	movff	GLCD_loc, GLCD_bar_loc, A
 	movlw	0x6E
@@ -482,9 +484,12 @@ GLCD_Compare_Loop:
 	addwfc	GLCD_comp_h, F, A
 	movf	GLCD_comp_h, W, A
 	cpfsgt	temp_hex_h, A	    ;   ADC temperature higher byte (hex)
-	goto	GLCD_Compare_Loop_Lower
+	goto	GLCD_Compare_Loop_Higher
 	call	GLCD_Print_Full_Bar
 	bra	GLCD_Compare_Loop
+GLCD_Compare_Loop_Higher:
+	cpfseq	temp_hex_h, A
+	goto	GLCD_Compare_Small
 GLCD_Compare_Loop_Lower:
 	movf	GLCD_comp_l, W, A
 	cpfsgt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
