@@ -5,7 +5,8 @@ extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb ; GLCD_Bar
 extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 extrn	GLCD_Compare, GLCD_Full_Bar, Avg16val_and_Calibrate
 extrn	DCon4Dig
-extrn	UART_Send_Temperature
+extrn	UART_Send_Temperature, UART_Setup
+extrn	ADC_Setup
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 page_counter:	ds 1	; reserve 1 byte for counting through nessage	
@@ -19,6 +20,8 @@ main:
 	org	0x100		    ; Main code starts here at address 0x100
 setup:
 	call	GLCD_Setup
+	call	ADC_Setup
+	call	UART_Setup
 temperature:
 	call	GLCD_Left
 	call	GLCD_Tt
@@ -86,8 +89,8 @@ bar:
 	call	GLCD_Set_Y
 	call	Avg16val_and_Calibrate
 	call	GLCD_Compare
-	;call	DCon4Dig
-	;call	UART_Send_Temperature
+	call	DCon4Dig
+	call	UART_Send_Temperature
 	call	Avg16val_and_Calibrate
 	call	GLCD_Compare
 	;call	DCon4Dig
