@@ -85,11 +85,11 @@ bar:
 	movlw	9
 	call	GLCD_Set_Y
 	call	Avg16val_and_Calibrate
-	call	DCon4Dig
-	call	UART_Send_Temperature
 	call	GLCD_Compare
+	;call	DCon4Dig
+	;call	UART_Send_Temperature
 	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
+	;call	GLCD_Compare
 	call	DCon4Dig
 	call	UART_Send_Temperature
 	
