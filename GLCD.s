@@ -445,6 +445,9 @@ GLCD_Bar_Loop:
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Bar_Loop
+	movlw	0
+	call	GLCD_Write_Data
+	call	GLCD_Write_Data
 	return
 	
 GLCD_Full_Bar:
@@ -455,6 +458,9 @@ GLCD_Full_Bar_Loop:
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Full_Bar_Loop
+	movlw	0
+	call	GLCD_Write_Data
+	call	GLCD_Write_Data
 	return
 
 GLCD_Compare:
@@ -481,8 +487,10 @@ GLCD_Compare_Loop:
 	bra	GLCD_Compare_Loop
 GLCD_Compare_Loop_Lower:
 	movf	GLCD_comp_l, W, A
-	cpfslt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
-	bra	GLCD_Print_Full_Bar
+	cpfsgt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
+	bra	GLCD_Compare_Small
+	call	GLCD_Print_Full_Bar
+	bra	GLCD_Compare_Loop
 GLCD_Compare_Small:
 	movlw	0x32		    
 	subwf	GLCD_comp_l, F, A   
@@ -506,8 +514,10 @@ GLCD_Compare_Small_Loop:
 	movlw	0x00
 	addwfc	GLCD_comp_h, F, A
 	movf	GLCD_comp_h, W, A
-	cpfslt	temp_hex_h, A
+	cpfsgt	temp_hex_h, A
+	bra	GLCD_Compare_Small_Loop_Lower
 	bra	GLCD_Compare_Small_Loop
+GLCD_Compare_Small_Loop_Lower:
 	movf	GLCD_comp_l, W, A
 	cpfslt	temp_hex_l, A
 	bra	GLCD_Compare_Small_Loop
@@ -525,7 +535,7 @@ GLCD_Print_Full_Bar:
 	movf	GLCD_bar_loc, W, A  ; not sure if you already did this
 	call	GLCD_Set_Y  ; sets Y location to the same as start of bar
 	call	GLCD_Full_Bar ; prints one full block
-	bra	GLCD_Compare_Loop
+	return
 
 end
 

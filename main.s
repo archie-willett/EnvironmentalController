@@ -84,11 +84,8 @@ bar:
 	movlw	9
 	call	GLCD_Set_Y
 	call	GLCD_Compare
-;	call    GLCD_Bar
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
-	call	GLCD_Full_Bar
+
+	call	GLCD_Compare
 ;	movlw	0
 ;	call	GLCD_Write_Data
 ;	call	GLCD_Write_Data
