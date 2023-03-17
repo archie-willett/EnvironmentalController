@@ -1,6 +1,6 @@
 #include <xc.inc>
 
-global  ADC_Setup, ADC_Read    
+global  ADC_Setup, ADC_Read
     
 psect	adc_code, class=CODE
     
@@ -9,7 +9,7 @@ ADC_Setup:
 	movlb	0x0f
 	bsf	ANSEL3	    ; set AN0 to analog
 	movlb	0x00
-	movlw   00001000B   ; select AN0 for measurement
+	movlw   00001001B   ; select AN0 for measurement
 	movwf   ADCON0, A   ; and turn ADC on
 	movlw   0x30	    ; Select 4.096V positive reference
 	movwf   ADCON1,	A   ; 0V for -ve reference and -ve input
@@ -22,6 +22,7 @@ ADC_Read:
 adc_loop:
 	btfsc   GO	    ; check to see if finished
 	bra	adc_loop
+	
 	return
 
 end
