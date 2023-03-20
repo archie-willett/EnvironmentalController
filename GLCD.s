@@ -4,7 +4,7 @@ global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
-global	GLCD_Compare, GLCD_Full_Bar
+global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc
     
 extrn	h1, l1
     
@@ -298,6 +298,19 @@ GLCD_c:
 	movlw	00010010B
 	call	GLCD_Write_Data
 	return
+	
+GLCD_bc:
+	movlw	00001000B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	movlw	00110000B
+	call	GLCD_Write_Data
+	movlw	01001000B
+	call	GLCD_Write_Data
+	movlw	01001000B
+	call	GLCD_Write_Data
+	return
 
 GLCD_I:
 	movlw	11111000B
@@ -355,6 +368,8 @@ GLCD_1:
 	call	GLCD_Write_Data
 	movlw	00010000B
 	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
 	return
 
 GLCD_2:
@@ -363,6 +378,8 @@ GLCD_2:
 	movlw	00010101B
 	call	GLCD_Write_Data
 	movlw	00010111B
+	call	GLCD_Write_Data
+	movlw	00000000B
 	call	GLCD_Write_Data
 	return
 
@@ -373,6 +390,8 @@ GLCD_3:
 	call	GLCD_Write_Data
 	movlw	00011111B
 	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
 	return
 
 GLCD_4:
@@ -381,6 +400,8 @@ GLCD_4:
 	movlw	00000100B
 	call	GLCD_Write_Data
 	movlw	00011110B
+	call	GLCD_Write_Data
+	movlw	00000000B
 	call	GLCD_Write_Data
 	return
 
@@ -391,6 +412,8 @@ GLCD_5:
 	call	GLCD_Write_Data
 	movlw	00011101B
 	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
 	return
 
 GLCD_6:
@@ -399,6 +422,8 @@ GLCD_6:
 	movlw	00010101B
 	call	GLCD_Write_Data
 	movlw	00011101B
+	call	GLCD_Write_Data
+	movlw	00000000B
 	call	GLCD_Write_Data
 	return
 	
@@ -409,6 +434,8 @@ GLCD_7:
 	call	GLCD_Write_Data
 	movlw	00000111B
 	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
 	return
 	
 GLCD_8:	
@@ -417,6 +444,8 @@ GLCD_8:
 	movlw	00010101B
 	call	GLCD_Write_Data
 	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00000000B
 	call	GLCD_Write_Data
 	return
 
@@ -427,6 +456,8 @@ GLCD_9:
 	call	GLCD_Write_Data
 	movlw	00011111B
 	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
 	return
 	
 GLCD_0:
@@ -435,6 +466,8 @@ GLCD_0:
 	movlw	10001000B
 	call	GLCD_Write_Data
 	movlw	11111000B
+	call	GLCD_Write_Data
+	movlw	00000000B
 	call	GLCD_Write_Data
 	return
 
@@ -447,9 +480,6 @@ GLCD_Bar_Loop:
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Bar_Loop
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
 	return
 	
 GLCD_Full_Bar:
@@ -460,11 +490,28 @@ GLCD_Full_Bar_Loop:
 	call	GLCD_Write_Data
 	decfsz	GLCD_counterx, A
 	bra	GLCD_Full_Bar_Loop
-	movlw	0
-	call	GLCD_Write_Data
-	call	GLCD_Write_Data
 	return
-
+	
+GLCD_Clear_Bar_Page:
+	movlw	11
+	movwf	GLCD_counterx, A
+GLCD_Clear_Bar_Loop:	
+	movlw	0x0
+	call	GLCD_Write_Data
+	decfsz	GLCD_counterx, A
+	bra	GLCD_Clear_Bar_Loop
+	return
+	
+GLCD_Clear_Bar:
+	decf	GLCD_comp_counter
+	movf	GLCD_comp_counter, W, A
+	call	GLCD_Set_Page
+	movlw	1
+	cpfsgt	GLCD_comp_counter
+	bra	GLCD_Clear_Bar
+	call	GLCD_Clear_Bar_Page
+	return
+	
 GLCD_Compare:
     	movf	h1, W, A
 	movwf	temp_hex_h, A
@@ -509,7 +556,7 @@ GLCD_Compare_Small:
 	bra	GLCD_Compare_Small_Loop
 GLCD_Compare_Remainder_Lower:
 	cpfsgt	temp_hex_l, A
-	return
+	goto	GLCD_Empty_Bar		    
 GLCD_Compare_Small_Loop:
 	movlw	00000001B
 	addwf	GLCD_graph_line, F, A
@@ -532,6 +579,10 @@ GLCD_Compare_Small_Loop_Lower:
 	call	GLCD_Set_Y  ; sets Y location to the same as start of bar
 	movf	GLCD_graph_line, W, A
 	call	GLCD_Partial_Bar
+GLCD_Empty_Bar:
+	movf	GLCD_bar_loc, W, A
+	call	GLCD_Set_Y
+	call	GLCD_Clear_Bar
 	return
 
 GLCD_Print_Full_Bar:
