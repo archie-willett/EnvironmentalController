@@ -50,12 +50,15 @@ GLCD_Current_Temperature:
 	movlw	0x0F
 	andwf	GLCD_temp_compare, A
 	call	GLCD_Current_Temp_Compare
+	
 	movff	GLCD_Current_Temp_l, GLCD_temp_compare, A
 	movlw	0xF0
 	andwf	GLCD_temp_compare, A
 	call	GLCD_Current_Temp_Compare
+	
 	movlw	10000000B
 	call	GLCD_Write_Data
+	
 	movff	GLCD_Current_Temp_l, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, A
