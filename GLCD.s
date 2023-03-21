@@ -4,7 +4,7 @@ global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
-global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc
+global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
     
 extrn	h1, l1
     
@@ -503,11 +503,11 @@ GLCD_Clear_Bar_Loop:
 	return
 	
 GLCD_Clear_Bar:
-	decf	GLCD_comp_counter
+	decf	GLCD_comp_counter, A
 	movf	GLCD_comp_counter, W, A
 	call	GLCD_Set_Page
 	movlw	1
-	cpfsgt	GLCD_comp_counter
+	cpfsgt	GLCD_comp_counter, A
 	bra	GLCD_Clear_Bar
 	call	GLCD_Clear_Bar_Page
 	return

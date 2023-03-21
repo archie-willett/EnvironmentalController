@@ -1,6 +1,7 @@
 #include <xc.inc>
     
 global  UART_Setup, UART_Transmit_Message, UART_Send_Temperature
+global	UART_Transmit_Byte
 extrn	Convert_Hex_ASCII, DCon4DigH, DCon4DigL
 
 psect	udata_acs   ; reserve data space in access ram
