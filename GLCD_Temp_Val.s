@@ -17,7 +17,7 @@ counter:    ds 1    ; reserve one byte for a counter variable
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
 NumberTable:
-	db	11111000B, 10001000B, 11111000B
+	db	00011111B, 00010001B, 00011111B
 	db	00010001B, 00011111B, 00010000B
 	db	00011101B, 00010101B, 00010111B
 	db	00010001B, 00010101B, 00011111B

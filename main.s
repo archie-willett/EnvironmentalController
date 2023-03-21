@@ -1,12 +1,15 @@
 	#include <xc.inc>
+global	current_temperature
+	
 extrn   GLCD_Setup, GLCD_Write_Data, GLCD_Tt, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb ; GLCD_Bar
-extrn	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+extrn	GLCD_3,GLCD_0,GLCD_5;,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 extrn	GLCD_Compare, GLCD_Full_Bar, Avg16val_and_Calibrate, GLCD_bc
 extrn	DCon4Dig, GLCD_Temp_Val_setup, GLCD_Current_Temperature
 extrn	UART_Send_Temperature, UART_Setup
 extrn	ADC_Setup
+extrn	GLCD_Update_Bars, GLCD_Update_Bars_Setup
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 page_counter:	ds 1	; reserve 1 byte for counting through nessage	
@@ -85,7 +88,7 @@ time:
 	movlw	0x0
 	call	GLCD_Write_Data
 	call	GLCD_lE
-current_temperature:
+current_temperature_setup:
 	movlw	0
 	call	GLCD_Set_Page
 	call	GLCD_Set_Y
@@ -94,43 +97,24 @@ current_temperature:
 	movlw	0x0
 	call	GLCD_Write_Data
 	call	GLCD_p
-	movlw	0x0
-	call	GLCD_Write_Data
+	movlw	36
+	call	GLCD_Set_Y
+	call	GLCD_c
+	call	GLCD_Update_Bars_Setup
+
+current_temperature:
+	movlw	0
+	call	GLCD_Set_Page
+	movlw	21
+	call	GLCD_Set_Y
 	call	Avg16val_and_Calibrate
 	call	DCon4Dig
 	call	GLCD_Current_Temperature
-	call	GLCD_c
 bar:
-	call	GLCD_Left
-	movlw	9
-	call	GLCD_Set_Y
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	DCon4Dig
-	call	UART_Send_Temperature
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	;call	DCon4Dig
-	;call	UART_Send_Temperature
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	GLCD_Right
+	movlw	6
+	call	GLCD_Set_Page
+	goto	GLCD_Update_Bars
 	movlw	0
-	call	GLCD_Set_Y
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
-	call	Avg16val_and_Calibrate
-	call	GLCD_Compare
 	goto	current_temperature
 	
 wait:	

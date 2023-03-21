@@ -3,9 +3,11 @@
 global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
-global	GLCD_0,GLCD_1,GLCD_2,GLCD_3,GLCD_4,GLCD_5,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+global	GLCD_3,GLCD_0,GLCD_5;,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
-    
+global	GLCD_Update_Bars, GLCD_Update_Bars_Setup
+
+extrn	Avg16val_and_Calibrate, current_temperature
 extrn	h1, l1
     
 psect	udata_acs   ; named variables in access ram
@@ -22,11 +24,16 @@ temp_hex_l:	ds 1
 GLCD_comp_counter:   ds 1
 GLCD_graph_line:    ds 1
 GLCD_bar_height:    ds 1
+GLCD_Bar_Values:   ds 16
+zero:	ds 1
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
 GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
 GLCD_counterx:  ds 1	;
+GLCD_update_bars_inc: ds 1
+GLCD_update_bars_new: ds 1
+GLCD_update_bars_counter: ds 1
     
 	GLCD_CS1 EQU 0	; column left
 	GLCD_CS2 EQU 1	; column right
@@ -35,30 +42,25 @@ GLCD_counterx:  ds 1	;
 	GLCD_E	EQU 4	; LCD enable bit
 	RST EQU	5
 
-
 psect	glcd_code,class=CODE
     
 GLCD_Setup:
 	clrf    LATB, A
-	movlw   00000000B	    ; RB0:5 all outputs
-	movwf	TRISB, A
+	clrf	TRISB, A
 	movlw   4
 	clrf    LATD, A
-
 	clrf	TRISD, A
 	movlw   4
 	call	GLCD_delay_ms	; wait 40ms for LCD to start up properly
 
 	bcf	LATB, RST, A
 	bsf	LATB, RST, A
-	bcf	LATB, GLCD_CS1, A   ;set column 1 on	
-	bcf	LATB, GLCD_CS2, A   ;set column 2 on
+	call	GLCD_Both
 
 	movlw	00111110B	; display off
 	call	GLCD_Instruction
 	movlw	1		; wait 40us
 	call	GLCD_delay_x4us
-	
 	call	GLCD_Clear_Display
 	
 	movlw	01000000B	;y address
@@ -75,9 +77,6 @@ GLCD_Setup:
 	call	GLCD_Instruction
 	movlw	1		; wait 40us
 	call	GLCD_delay_x4us
-	
-	
-	
 	return
 
 GLCD_Clear_Display:
@@ -360,29 +359,26 @@ space_loop:
 	decfsz	GLCD_cnt_ms, A
 	bra	space_loop
 	return
-	
-GLCD_1:
-	movlw	00010001B
-	call	GLCD_Write_Data
-	movlw	00011111B
-	call	GLCD_Write_Data
-	movlw	00010000B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-
-GLCD_2:
-	movlw	00011101B
-	call	GLCD_Write_Data
-	movlw	00010101B
-	call	GLCD_Write_Data
-	movlw	00010111B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-
+;GLCD_1:
+;	movlw	00010001B
+;	call	GLCD_Write_Data
+;	movlw	00011111B
+;	call	GLCD_Write_Data
+;	movlw	00010000B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
+;GLCD_2:
+;	movlw	00011101B
+;	call	GLCD_Write_Data
+;	movlw	00010101B
+;	call	GLCD_Write_Data
+;	movlw	00010111B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
 GLCD_3:
 	movlw	00010001B
 	call	GLCD_Write_Data
@@ -393,18 +389,16 @@ GLCD_3:
 	movlw	00000000B
 	call	GLCD_Write_Data
 	return
-
-GLCD_4:
-	movlw	00000111B
-	call	GLCD_Write_Data
-	movlw	00000100B
-	call	GLCD_Write_Data
-	movlw	00011110B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-
+;GLCD_4:
+;	movlw	00000111B
+;	call	GLCD_Write_Data
+;	movlw	00000100B
+;	call	GLCD_Write_Data
+;	movlw	00011110B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
 GLCD_5:	
 	movlw	00010111B
 	call	GLCD_Write_Data
@@ -415,51 +409,46 @@ GLCD_5:
 	movlw	00000000B
 	call	GLCD_Write_Data
 	return
-
-GLCD_6:
-	movlw	00011111B
-	call	GLCD_Write_Data
-	movlw	00010101B
-	call	GLCD_Write_Data
-	movlw	00011101B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-	
-GLCD_7:
-	movlw	00000001B
-	call	GLCD_Write_Data
-	movlw	00011001B
-	call	GLCD_Write_Data
-	movlw	00000111B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-	
-GLCD_8:	
-	movlw	00011111B
-	call	GLCD_Write_Data
-	movlw	00010101B
-	call	GLCD_Write_Data
-	movlw	00011111B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-
-GLCD_9:
-	movlw	00000111B
-	call	GLCD_Write_Data
-	movlw	00000101B
-	call	GLCD_Write_Data
-	movlw	00011111B
-	call	GLCD_Write_Data
-	movlw	00000000B
-	call	GLCD_Write_Data
-	return
-	
+;GLCD_6:
+;	movlw	00011111B
+;	call	GLCD_Write_Data
+;	movlw	00010101B
+;	call	GLCD_Write_Data
+;	movlw	00011101B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
+;GLCD_7:
+;	movlw	00000001B
+;	call	GLCD_Write_Data
+;	movlw	00011001B
+;	call	GLCD_Write_Data
+;	movlw	00000111B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
+;GLCD_8:	
+;	movlw	00011111B
+;	call	GLCD_Write_Data
+;	movlw	00010101B
+;	call	GLCD_Write_Data
+;	movlw	00011111B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
+;GLCD_9:
+;	movlw	00000111B
+;	call	GLCD_Write_Data
+;	movlw	00000101B
+;	call	GLCD_Write_Data
+;	movlw	00011111B
+;	call	GLCD_Write_Data
+;	movlw	00000000B
+;	call	GLCD_Write_Data
+;	return
 GLCD_0:
 	movlw	11111000B
 	call	GLCD_Write_Data
@@ -592,6 +581,68 @@ GLCD_Print_Full_Bar:
 	call	GLCD_Set_Y  ; sets Y location to the same as start of bar
 	call	GLCD_Full_Bar ; prints one full block
 	return
+
+GLCD_Update_Bars_Setup:
+	movlw	0
+	movwf	zero, A
+	lfsr	1, GLCD_Bar_Values
+	movlw	17
+	movwf	GLCD_update_bars_counter, A
+GLCD_Update_Bars_Setup_Loop:
+	clrf	POSTINC1, A
+	decfsz	GLCD_update_bars_counter, A
+	bra	GLCD_Update_Bars_Setup_Loop
+	return
+
+GLCD_Update_Bars:
+	lfsr	1, GLCD_Bar_Values
+	movlw	0x02
+	movwf	GLCD_update_bars_inc, A
+	movlw	0x08
+	movwf	GLCD_update_bars_counter, A
+	call	GLCD_Left
+	movlw	9
+	call	GLCD_Set_Y
+GLCD_Update_Bars_Loop:
+	movlw	0x04
+	subwf	GLCD_update_bars_counter, W, A	
+	cpfsgt	zero, A
+	bra	GLCD_Update_Bars_Page_Right
+GLCD_Update_Bars_Loop_Main:
+	movf	GLCD_update_bars_inc, W, A
+	movff	PLUSW1, GLCD_update_bars_new, A
+	sublw	0x02
+	movff	GLCD_update_bars_new, PLUSW1
+	movff	PLUSW1, h1, A
+	incf	GLCD_update_bars_inc, A
+	
+	movf	GLCD_update_bars_inc, W, A
+	movff	PLUSW1, GLCD_update_bars_new, A
+	sublw	0x02
+	movff	GLCD_update_bars_new, PLUSW1
+	movff	PLUSW1, l1, A
+	incf	GLCD_update_bars_inc, A
+	
+	decfsz	GLCD_update_bars_counter, A
+	goto	GLCD_Update_Bars_Draw
+	goto	GLCD_Update_Bars_New_Temp
+GLCD_Update_Bars_Draw:
+	call	GLCD_Compare
+	goto	GLCD_Update_Bars_Loop
+GLCD_Update_Bars_Page_Right:
+	call	GLCD_Right
+	movlw	0
+	call	GLCD_Set_Y
+	goto	GLCD_Update_Bars_Loop_Main
+GLCD_Update_Bars_New_Temp:
+	call	Avg16val_and_Calibrate
+	movlw	0x0E
+	movff	h1, PLUSW1, A
+	movlw	0x0F
+	movff	l1, PLUSW1, A
+	call	GLCD_Compare
+	movlw	0
+	goto	current_temperature
 
 end
 
