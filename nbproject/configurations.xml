@@ -23,6 +23,7 @@
       <itemPath>Delays.s</itemPath>
       <itemPath>GLCD_Temp_Val.s</itemPath>
       <itemPath>Keypad.s</itemPath>
+      <itemPath>GLCD_Axis.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

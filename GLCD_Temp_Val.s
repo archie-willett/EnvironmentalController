@@ -2,7 +2,8 @@
     
 global	GLCD_Temp_Val_setup, GLCD_Current_Temperature
     
-extrn	  TempVal_Dec_H, TempVal_Dec_L, GLCD_Write_Data
+extrn	  TempVal_Dec_H, TempVal_Dec_L, GLCD_Write_Data, GLCD_Right
+extrn	  GLCD_Set_Page, GLCD_Set_Y
     
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 NumberArray:    ds 0x1E ; reserve 30 bytes for numbers
@@ -52,6 +53,11 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	return
 
 GLCD_Current_Temperature:
+	movlw	0
+	call	GLCD_Set_Page
+	movlw	21
+	call	GLCD_Set_Y
+    
 	movff	TempVal_Dec_H, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, F, A

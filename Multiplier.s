@@ -4,7 +4,8 @@ global	Mult_16x16,   Mult_24x8, DCon4Dig, Convert_Hex_ASCII
 global	Avg16val_and_Calibrate
 global	U1, H1, L1, H2, L2
 global	TempVal_Dec_H, TempVal_Dec_L, TempVal_Hex_H, TempVal_Hex_L
-    
+global	Collect_and_Process_Temperature
+
 extrn	ADC_Read
 extrn	delay_x1ms
 
@@ -89,7 +90,15 @@ Mult_24x8:
 	
 	return
 
+Collect_and_Process_Temperature:
+	call	Avg16val_and_Calibrate
+	call	DCon4Dig
+	return
+	
 DCon4Dig: 
+	movff	TempVal_Hex_H, H1, A
+	movff	TempVal_Hex_L, L1, A
+	
 	movlw	dec_L
 	movwf	L2, A
 	movlw	dec_H
@@ -172,8 +181,8 @@ Calibrate:
 	movlw	cal_H
 	movwf	H2, A
 	call	Mult_16x16
-	movff	res2, H1, A
-	movff	res1, L1, A
+	movff	res2, TempVal_Hex_H, A
+	movff	res1, TempVal_Hex_L, A
 ;	movlw	cal_offset_L
 ;	subwfb	H1, F, A
 	return
