@@ -176,43 +176,11 @@ GLCD_Both:
     
 GLCD_Enable:	    ; pulse enable bit LCD_E for 1000ns
         bcf	LATB, GLCD_E, A	    ; Writes data to LCD	
-        nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
+        movlw	0x04
+	call	GLCD_delay_x125ns
 	bsf	LATB, GLCD_E, A	    ; Take enable high	
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
+	movlw	0x04
+	call	GLCD_delay_x125ns
 	bcf	LATB, GLCD_E, A	    ; Writes data to LCD
 	return	
 	
@@ -237,11 +205,17 @@ GLCD_delay_x4us:		    ; delay given in chunks of 4 microsecond in W
 	
 GLCD_delay:			; delay routine	4 instruction loop == 250ns	    
 	movlw 	0x00		; W=0
-glcdlp1:	decf 	GLCD_cnt_l, F, A	; no carry when 0x00 -> 0xff
+glcdlp1:
+	decf 	GLCD_cnt_l, F, A	; no carry when 0x00 -> 0xff
 	subwfb 	GLCD_cnt_h, F, A	; no carry when 0x00 -> 0xff
 	bc 	glcdlp1		; carry, then loop again
 	return			; carry reset so return
 
+GLCD_delay_x125ns:
+	decfsz	WREG, A
+	bra	GLCD_delay_x125ns
+	return
+	
 GLCD_Tt:
 	movlw	00000001B
 	call	GLCD_Write_Data
@@ -598,9 +572,7 @@ GLCD_Update_Bars:
 	call	GLCD_Set_Page
 	lfsr	1, GLCD_Bar_Values
 	movf	POSTINC1
-	nop
 	movf	POSTINC1
-	nop
 	lfsr	2, GLCD_Bar_Values
 	movlw	0x02
 	movwf	GLCD_update_bars_inc, A
@@ -616,19 +588,13 @@ GLCD_Update_Bars_Loop:
 GLCD_Update_Bars_Loop_Main:
 	movf	GLCD_update_bars_inc, W, A
 	movff	POSTINC1, GLCD_update_bars_new, A
-	nop
 	movff	GLCD_update_bars_new, INDF2
-	nop
 	movff	POSTINC2, temp_hex_h, A
-	nop
 	
 	movf	GLCD_update_bars_inc, W, A
 	movff	POSTINC1, GLCD_update_bars_new, A
-	nop
 	movff	GLCD_update_bars_new, INDF2
-	nop
 	movff	POSTINC2, temp_hex_l, A
-	nop
 	
 	decfsz	GLCD_update_bars_counter, A
 	goto	GLCD_Update_Bars_Draw
@@ -644,10 +610,8 @@ GLCD_Update_Bars_Page_Right:
 GLCD_Update_Bars_New_Temp:
 	movff	TempVal_Hex_H, temp_hex_h, A
 	movff	temp_hex_h, POSTINC2
-	nop
 	movff	TempVal_Hex_L, temp_hex_l, A
 	movff	temp_hex_l, POSTINC2
-	nop
 	call	GLCD_Compare
 	movlw	0
 	goto	current_temperature
