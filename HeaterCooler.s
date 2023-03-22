@@ -5,8 +5,9 @@ extrn	TempVal_Hex_H, TempVal_Hex_L, GoalTemp_Hex_H, GoalTemp_Hex_L
 extrn	H1, L1, H2, L2
 
 psect	udata_acs   ; named variables in access ram
-OnOff_Bit:	    ds 1
+OnOff_Switch:	    ds 1 ; bit 0 - On/Off Controller, bit 1 - P Controller
 Proportional_Bit:   ds 1
+P_Controller_OnOff_Switch: ds 1
 	
 	
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
@@ -48,32 +49,31 @@ Subtraction_16bit:
 	return
 
 OnOff_Controller:
-	movlw	0
-	cpfseq	OnOff_Bit
+	btfsc	OnOff_Switch
 	bra	Controller_On
 	bra	Controller_Off
 Controller_Off:
-	movff	TempVal_Hex_L, L2, A
-	movff	TempVal_Hex_H, H2, A
-	movff	GoalTemp_Hex_L, L1, A
-	movff	GoalTemp_Hex_H, H1, A
-	bra	Compare_Temp_vs_Goal
-Controller_On:
 	movff	TempVal_Hex_L, L1, A
 	movff	TempVal_Hex_H, H1, A
 	movff	GoalTemp_Hex_L, L2, A
 	movff	GoalTemp_Hex_H, H2, A
 	bra	Compare_Temp_vs_Goal
-Compare_Temp_vs_Goal:
-	movlw	OnOff_Threshold
-	addwf	L1, F, A
+Controller_On:
+	movff	TempVal_Hex_L, L2, A
+	movff	TempVal_Hex_H, H2, A
+	movff	GoalTemp_Hex_L, L1, A
+	movff	GoalTemp_Hex_H, H1, A
+	bra	Compare_Temp_vs_Goal
+Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - 2
+	movlw	OnOff_Threshold	    ;On-Off when Temp > GoalTemp + 2
+	subwf	L2, F, A
 	clrf	WREG, A
-	addwfc	H1, F, A
+	subwfb	H2, F, A
 	call	Subtraction_16bit
-	bn	OnOff_Switch
+	bnn	Switch_OnOff
 	return
-OnOff_Switch:
-	btg	OnOff_Bit, 0, A
+Switch_OnOff:
+	btg	OnOff_Switch, 0, A
 	return
 	
 
@@ -86,7 +86,8 @@ P_Controller:
 	bn	P_Controller_Off
 	movff	res0, Proportional_Bit, A
 	return
-P_Controller_Off:
+P_Controller_Turn_Off:
+	bcf	OnOff_Switch, 1, A
 	clrf	Proportional_Bit, A
 	return
 	
