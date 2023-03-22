@@ -24,16 +24,21 @@ temp_hex_l:	ds 1
 GLCD_comp_counter:   ds 1
 GLCD_graph_line:    ds 1
 GLCD_bar_height:    ds 1
-GLCD_Bar_Values:   ds 16
-zero:	ds 1
 
+GLCD_update_bars_inc: ds 1
+GLCD_update_bars_new: ds 1
+GLCD_update_bars_counter: ds 1
+
+psect	udata_bank3 ; reserve data anywhere in RAM (here at 0x400)
+GLCD_Bar_Values:   ds 20
+    
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
 GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
 GLCD_counterx:  ds 1	;
-GLCD_update_bars_inc: ds 1
-GLCD_update_bars_new: ds 1
-GLCD_update_bars_counter: ds 1
+;GLCD_update_bars_inc: ds 1
+;GLCD_update_bars_new: ds 1
+;GLCD_update_bars_counter: ds 1
     
 	GLCD_CS1 EQU 0	; column left
 	GLCD_CS2 EQU 1	; column right
@@ -583,10 +588,8 @@ GLCD_Print_Full_Bar:
 	return
 
 GLCD_Update_Bars_Setup:
-	movlw	0
-	movwf	zero, A
 	lfsr	1, GLCD_Bar_Values
-	movlw	17
+	movlw	21
 	movwf	GLCD_update_bars_counter, A
 GLCD_Update_Bars_Setup_Loop:
 	clrf	POSTINC1, A
@@ -596,32 +599,42 @@ GLCD_Update_Bars_Setup_Loop:
 
 GLCD_Update_Bars:
 	lfsr	1, GLCD_Bar_Values
+	movf	POSTINC1
+	nop
+	movf	POSTINC1
+	nop
+	lfsr	2, GLCD_Bar_Values
 	movlw	0x02
 	movwf	GLCD_update_bars_inc, A
-	movlw	0x08
+	movlw	0x0A
 	movwf	GLCD_update_bars_counter, A
 	call	GLCD_Left
 	movlw	9
 	call	GLCD_Set_Y
 GLCD_Update_Bars_Loop:
-	movlw	0x04
+	movlw	0x05
 	subwf	GLCD_update_bars_counter, W, A	
-	cpfsgt	zero, A
-	bra	GLCD_Update_Bars_Page_Right
+	bz	GLCD_Update_Bars_Page_Right
 GLCD_Update_Bars_Loop_Main:
 	movf	GLCD_update_bars_inc, W, A
-	movff	PLUSW1, GLCD_update_bars_new, A
-	sublw	0x02
-	movff	GLCD_update_bars_new, PLUSW1
-	movff	PLUSW1, h1, A
-	incf	GLCD_update_bars_inc, A
+	movff	POSTINC1, GLCD_update_bars_new, A
+	nop
+	;sublw	0x02
+	movff	GLCD_update_bars_new, INDF2
+	nop
+	movff	POSTINC2, h1, A
+	nop
+	;incf	GLCD_update_bars_inc, A
 	
 	movf	GLCD_update_bars_inc, W, A
-	movff	PLUSW1, GLCD_update_bars_new, A
-	sublw	0x02
-	movff	GLCD_update_bars_new, PLUSW1
-	movff	PLUSW1, l1, A
-	incf	GLCD_update_bars_inc, A
+	movff	POSTINC1, GLCD_update_bars_new, A
+	nop
+	;sublw	0x02
+	movff	GLCD_update_bars_new, INDF2
+	nop
+	movff	POSTINC2, l1, A
+	nop
+	;incf	GLCD_update_bars_inc, A
 	
 	decfsz	GLCD_update_bars_counter, A
 	goto	GLCD_Update_Bars_Draw
@@ -637,9 +650,11 @@ GLCD_Update_Bars_Page_Right:
 GLCD_Update_Bars_New_Temp:
 	call	Avg16val_and_Calibrate
 	movlw	0x0E
-	movff	h1, PLUSW1, A
+	movff	h1, POSTINC2
+	nop
 	movlw	0x0F
-	movff	l1, PLUSW1, A
+	movff	l1, POSTINC2
+	nop
 	call	GLCD_Compare
 	movlw	0
 	goto	current_temperature
