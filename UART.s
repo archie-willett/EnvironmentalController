@@ -2,7 +2,7 @@
     
 global  UART_Setup, UART_Transmit_Message, UART_Send_Temperature
 global	UART_Transmit_Byte
-extrn	Convert_Hex_ASCII, DCon4DigH, DCon4DigL
+extrn	Convert_Hex_ASCII, TempVal_Dec_H, TempVal_Dec_L
 
 psect	udata_acs   ; reserve data space in access ram
 UART_counter: ds    1	    ; reserve 1 byte for variable UART_counter
@@ -42,13 +42,13 @@ UART_Transmit_Byte:	    ; Transmits byte stored in W
     return
     
 UART_Send_Temperature:
-    movf    DCon4DigH, W, A
+    movf    TempVal_Dec_H, W, A
     call    UART_Write_Hex_Nib_Low
-    movf    DCon4DigL, W, A
+    movf    TempVal_Dec_L, W, A
     call    UART_Write_Hex_Nib_High
     movlw   '.'
     call    UART_Transmit_Byte
-    movf    DCon4DigL, W, A
+    movf    TempVal_Dec_L, W, A
     call    UART_Write_Hex_Nib_Low
     movlw   0xBA
     call    UART_Transmit_Byte

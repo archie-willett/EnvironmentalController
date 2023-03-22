@@ -2,7 +2,7 @@
     
 global	GLCD_Temp_Val_setup, GLCD_Current_Temperature
     
-extrn	  DCon4DigH, DCon4DigL, GLCD_Write_Data ;h1, l1, 
+extrn	  TempVal_Dec_H, TempVal_Dec_L, GLCD_Write_Data
     
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 NumberArray:    ds 0x1E ; reserve 30 bytes for numbers
@@ -52,12 +52,12 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	return
 
 GLCD_Current_Temperature:
-	movff	DCon4DigH, GLCD_temp_compare, A
+	movff	TempVal_Dec_H, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, F, A
 	call	GLCD_Current_Temp_Compare
 	
-	movff	DCon4DigL, GLCD_temp_compare, A
+	movff	TempVal_Dec_L, GLCD_temp_compare, A
 	movlw	0xF0
 	andwf	GLCD_temp_compare, F, A
 	swapf	GLCD_temp_compare, F, A
@@ -68,7 +68,7 @@ GLCD_Current_Temperature:
 	movlw	00000000B
 	call	GLCD_Write_Data
 	
-	movff	DCon4DigL, GLCD_temp_compare, A
+	movff	TempVal_Dec_L, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, F, A
 	call	GLCD_Current_Temp_Compare

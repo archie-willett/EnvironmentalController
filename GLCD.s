@@ -8,7 +8,7 @@ global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
 global	GLCD_Update_Bars, GLCD_Update_Bars_Setup
 
 extrn	Avg16val_and_Calibrate, current_temperature
-extrn	h1, l1
+extrn	H1, L1
     
 psect	udata_acs   ; named variables in access ram
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
@@ -507,9 +507,9 @@ GLCD_Clear_Bar:
 	return
 	
 GLCD_Compare:
-    	movf	h1, W, A
+    	movf	H1, W, A
 	movwf	temp_hex_h, A
-	movf	l1, W, A
+	movf	L1, W, A
 	movwf	temp_hex_l, A
 	movff	GLCD_loc, GLCD_bar_loc, A
 	movlw	0x6E
@@ -619,22 +619,18 @@ GLCD_Update_Bars_Loop_Main:
 	movf	GLCD_update_bars_inc, W, A
 	movff	POSTINC1, GLCD_update_bars_new, A
 	nop
-	;sublw	0x02
 	movff	GLCD_update_bars_new, INDF2
 	nop
-	movff	POSTINC2, h1, A
+	movff	POSTINC2, H1, A
 	nop
-	;incf	GLCD_update_bars_inc, A
 	
 	movf	GLCD_update_bars_inc, W, A
 	movff	POSTINC1, GLCD_update_bars_new, A
 	nop
-	;sublw	0x02
 	movff	GLCD_update_bars_new, INDF2
 	nop
-	movff	POSTINC2, l1, A
+	movff	POSTINC2, L1, A
 	nop
-	;incf	GLCD_update_bars_inc, A
 	
 	decfsz	GLCD_update_bars_counter, A
 	goto	GLCD_Update_Bars_Draw
@@ -650,10 +646,10 @@ GLCD_Update_Bars_Page_Right:
 GLCD_Update_Bars_New_Temp:
 	call	Avg16val_and_Calibrate
 	movlw	0x0E
-	movff	h1, POSTINC2
+	movff	H1, POSTINC2
 	nop
 	movlw	0x0F
-	movff	l1, POSTINC2
+	movff	L1, POSTINC2
 	nop
 	call	GLCD_Compare
 	movlw	0
