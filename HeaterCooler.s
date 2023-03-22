@@ -87,7 +87,6 @@ P_Controller:
 	movff	res0, Proportional_Bit, A
 	return
 P_Controller_Turn_Off:
-	bcf	OnOff_Switch, 1, A
 	clrf	Proportional_Bit, A
 	return
 	
