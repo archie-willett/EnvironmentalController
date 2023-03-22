@@ -11,23 +11,32 @@ counter:    ds 1    ; reserve one byte for a counter variable
 KeyPadVal:	ds 1   ; reserve 1 byte for variable
 delay_count:	ds 1    ; reserve one byte for counter in the delay routine
 KeyPad_checkbit: ds 1
-hh:	ds 1
-hl:	ds 1
-lh:	ds 1
-ll:	ds 1
+HH:	ds 1
+HL:	ds 1
+LH:	ds 1
+LL:	ds 1
 CheckH: ds 1
 CheckL: ds 1
+KeyPad_delay: ds 1
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
-myArray:    ds 0x80 ; reserve 128 bytes for message data
+Array_InputTemperature:    ds 18 ; reserve 18 bytes for message data
+Array_Confirm:		   ds 26 ; reserve 18 bytes for message data
 
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
-myTable:
+Table_InputTemperature:
 	db	'I','n','p','u','t',' ','T','e','m','p','e','r','a','t','u','r'
 	db	'e',0x0a
 					; message, plus carriage return
-	myTable_l   EQU	18	; length of data
+	Table_InputTemperature_l   EQU	18	; length of data
+	align	2
+Table_Confirm:
+	db	'C','o','n','f','i','r','m',0x0A
+	db	'Y','e','s',' ','(','A',')',' ','/',' ','N','o',' ','(','B',')'
+	db	0x0A, 0x0A
+					; message, plus carriage return
+	Table_Confirm_l   EQU	26	; length of data
 	align	2
 	
 psect	KeyPad_code, class=CODE 
@@ -37,18 +46,58 @@ KeyPad_init:
 	banksel PADCFG1
 	bsf	REPU
 	banksel 0
+KeyPad_InputTemp_init:
+	lfsr	0, Array_InputTemperature	; Load FSR0 with address in RAM	
+	movlw	low highword(Table_InputTemperature)	; address of data in PM
+	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+	movlw	high(Table_InputTemperature)	; address of data in PM
+	movwf	TBLPTRH, A		; load high byte to TBLPTRH
+	movlw	low(Table_InputTemperature)	; address of data in PM
+	movwf	TBLPTRL, A		; load low byte to TBLPTRL
+	movlw	Table_InputTemperature_l	; bytes to read
+	movwf 	counter, A		; our counter register
+InputTemp_message_read_loop: 	
+	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+	decfsz	counter, A		; count down to zero
+	bra	InputTemp_message_read_loop		; keep going until finished
+KeyPad_Confirm_init:
+	lfsr	0, Array_Confirm	; Load FSR0 with address in RAM	
+	movlw	low highword(Table_Confirm)	; address of data in PM
+	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
+	movlw	high(Table_Confirm)	; address of data in PM
+	movwf	TBLPTRH, A		; load high byte to TBLPTRH
+	movlw	low(Table_Confirm)	; address of data in PM
+	movwf	TBLPTRL, A		; load low byte to TBLPTRL
+	movlw	Table_Confirm_l	; bytes to read
+	movwf 	counter, A		; our counter register
+Confirm_message_read_loop: 	
+	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
+	decfsz	counter, A		; count down to zero
+	bra	Confirm_message_read_loop		; keep going until finished
 	return
+	
+KeyPad_confirm:
+	movlw	0x02
+	movwf	KeyPad_checkbit, A
+	movlw	0x00
+	movwf	KeyPad_delay, A
+	bra	KeyPad_loop
 KeyPad_check:
 	movlw	0x01
 	movwf	KeyPad_checkbit, A
+	movlw	0x00
+	movwf	KeyPad_delay, A
 	bra	KeyPad_loop
 KeyPad_wait:
 	movlw	0x00
 	movwf	KeyPad_checkbit, A
+	movlw	0x7F
+	movwf	KeyPad_delay, A
 	bra	KeyPad_loop
 KeyPad_loop:
-	;call	LCD_clear
-	movlw	0x7F
+	movf	KeyPad_delay, W, A
 	call	GLCD_delay_ms
 	movlw	0x0F
 	movwf	TRISE, A
@@ -63,7 +112,7 @@ KeyPad_loop:
 	addwf	KeyPadVal, f, A
 	movlw	0x00
 	cpfseq	KeyPad_checkbit, A
-	bra	KeyPad_CheckC
+	bra	KeyPad_Check_Button
 	movlw	0xFF
 	cpfseq	KeyPadVal, A
 	bra	KeyPad_buttons
@@ -152,52 +201,64 @@ KeyPad_buttonC:
 	bnz	KeyPad_wait
 	retlw	'C'
 	
+KeyPad_Check_Button:
+	movlw	0x02
+	cpfseq	KeyPad_checkbit, A
+	bra	KeyPad_CheckC
+KeyPad_CheckA:
+	movlw	01111110B
+	subwf	KeyPadVal, W, A
+	bnz	KeyPad_CheckB
+	retlw	0x00
+KeyPad_CheckB:
+	movlw	01111011B
+	subwf	KeyPadVal, W, A
+	bnz	KeyPad_loop
+	retlw	0x01
 KeyPad_CheckC:
 	movlw	01110111B
 	cpfseq	KeyPadVal, A
 	return
-	call	KeyPad_InputTemp
-	return
+	bra	KeyPad_InputTemp
 
 KeyPad_InputTemp:
-	lfsr	0, myArray	; Load FSR0 with address in RAM	
-	movlw	low highword(myTable)	; address of data in PM
-	movwf	TBLPTRU, A		; load upper bits to TBLPTRU
-	movlw	high(myTable)	; address of data in PM
-	movwf	TBLPTRH, A		; load high byte to TBLPTRH
-	movlw	low(myTable)	; address of data in PM
-	movwf	TBLPTRL, A		; load low byte to TBLPTRL
-	movlw	myTable_l	; bytes to read
-	movwf 	counter, A		; our counter register
-message_loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter, A		; count down to zero
-	bra	message_loop		; keep going until finished
-	movlw	myTable_l	; output message to UART
-	lfsr	2, myArray
+	movlw	Table_InputTemperature_l	; output message to UART
+	lfsr	2, Array_InputTemperature
 	call	UART_Transmit_Message
 temperature_input:
+	movlw	0xFF
+	call	GLCD_delay_ms
 	call	KeyPad_wait
 	call	UART_Transmit_Byte
-	movwf	hl, A
-	movlw	0x30
-	subwf	hl, F, A
-	movff	hl, CheckH
+	sublw	0x30
+	movwf	HL, A
+	
+;	movlw	0x30
+;	subwf	HL, F, A
+	movff	HL, CheckH
+	
 	call	KeyPad_wait
 	call	UART_Transmit_Byte
-	movwf	lh, A
-	movlw	0x30
-	subwf	lh, F, A
+	sublw	0x30
+	movwf	LH, A
+	
+;	movlw	0x30
+;	subwf	LH, F, A
+	
 	movlw   '.'
 	call    UART_Transmit_Byte
+	
 	call	KeyPad_wait
 	call	UART_Transmit_Byte
-	movwf	ll, A
-	movlw	0x30
-	subwf	ll, F, A
-	swapf	lh, W, A
-	iorwf	ll, F, A
-	movff	ll, CheckL
+	sublw	0x30
+	movwf	LH, A
+	
+;	movlw	0x30
+;	subwf	LL, F, A
+	swapf	LH, W, A
+	iorwf	LL, F, A
+	movff	LL, CheckL
+	
 	movlw   0xBA
 	call    UART_Transmit_Byte
 	movlw   'C'
@@ -208,6 +269,13 @@ temperature_input:
 	call    UART_Transmit_Byte
 	movlw   0x0A
 	call    UART_Transmit_Byte
+Confirm:
+	movlw	Table_Confirm_l	; output message to UART
+	lfsr	2, Array_Confirm
+	call	UART_Transmit_Message
+	call	KeyPad_confirm
+	sublw	0x01
+	bz	KeyPad_InputTemp
 	return
 	
 Delay_10us:
