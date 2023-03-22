@@ -1,8 +1,10 @@
 #include <xc.inc>
 
-global	KeyPad_init, KeyPad_wait, delay_x1ms, KeyPad_check, CheckH, CheckL
+global	KeyPad_init, KeyPad_wait, delay_x1ms, KeyPad_check
+global	GoalTemp_Dec_H, GoalTemp_Dec_L
 extrn	GLCD_delay_x4us, GLCD_delay_ms, UART_Transmit_Byte
 extrn	UART_Send_Temperature, UART_Transmit_Message
+extrn	Convert_GoalTemp_Dec2Hex
     
     
     
@@ -232,18 +234,12 @@ temperature_input:
 	call	UART_Transmit_Byte
 	sublw	0x30
 	movwf	HL, A
-	
-;	movlw	0x30
-;	subwf	HL, F, A
-	movff	HL, CheckH
+	movff	HL, GoalTemp_Dec_H
 	
 	call	KeyPad_wait
 	call	UART_Transmit_Byte
 	sublw	0x30
 	movwf	LH, A
-	
-;	movlw	0x30
-;	subwf	LH, F, A
 	
 	movlw   '.'
 	call    UART_Transmit_Byte
@@ -253,11 +249,9 @@ temperature_input:
 	sublw	0x30
 	movwf	LH, A
 	
-;	movlw	0x30
-;	subwf	LL, F, A
 	swapf	LH, W, A
 	iorwf	LL, F, A
-	movff	LL, CheckL
+	movff	LL, GoalTemp_Dec_L
 	
 	movlw   0xBA
 	call    UART_Transmit_Byte
@@ -276,6 +270,7 @@ Confirm:
 	call	KeyPad_confirm
 	sublw	0x01
 	bz	KeyPad_InputTemp
+	call	Convert_GoalTemp_Dec2Hex
 	return
 	
 Delay_10us:

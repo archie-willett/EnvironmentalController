@@ -1,4 +1,4 @@
-	#include <xc.inc>
+#include <xc.inc>
 global	current_temperature
 	
 extrn   GLCD_Setup, UART_Setup, ADC_Setup, GLCD_Update_Bars_Setup

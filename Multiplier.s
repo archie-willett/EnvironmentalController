@@ -4,10 +4,12 @@ global	Mult_16x16,   Mult_24x8, DCon4Dig, Convert_Hex_ASCII
 global	Avg16val_and_Calibrate
 global	U1, H1, L1, H2, L2
 global	TempVal_Dec_H, TempVal_Dec_L, TempVal_Hex_H, TempVal_Hex_L
+global	Convert_GoalTemp_Dec2Hex, GoalTemp_Hex_H, GoalTemp_Hex_L
 global	Collect_and_Process_Temperature
 
 extrn	ADC_Read
 extrn	delay_x1ms
+extrn	GoalTemp_Dec_H, GoalTemp_Dec_L
 
     
 psect	udata_acs   ; named variables in access ram
@@ -30,6 +32,7 @@ avg_count: ds 1
 avg_res_H: ds 1
 avg_res_L: ds 1
 hex_asc_temp: ds 1
+dec_hex_temp: ds 1
     dec_L   EQU 0x8A
     dec_H   EQU 0x41
     cal_L   EQU 0x66
@@ -187,11 +190,34 @@ Calibrate:
 ;	subwfb	H1, F, A
 	return
 	
+Dec2Hex_Converter:
+	movlw	100
+	mulwf	H1, A
+	movff	PRODL, res0, A
+	movff	PRODH, res1, A
 	
+	movff	L1, dec_hex_temp, A
+	swapf	dec_hex_temp, F, A
+	movlw	0x0F
+	andwf	dec_hex_temp, F, A
+	movlw	10
+	mulwf	dec_hex_temp, A
+	movf	PRODL, W, A
+	addwf	res0, F, A
+	movf	PRODH, W, A
+	addwfc	res1, F, A
 	
+	movff	L1, dec_hex_temp, A
+	movlw	0x0F
+	andwf	dec_hex_temp, W, A
+	addwf	res0, F, A
+	clrf	WREG, A
+	addwfc	res1, F, A
 
-
-
-
-
-
+Convert_GoalTemp_Dec2Hex:
+	movff	GoalTemp_Dec_H, H1, A
+	movff	GoalTemp_Dec_L, L1, A
+	call	Dec2Hex_Converter
+	movff	res0, GoalTemp_Hex_L, A
+	movff	res1, GoalTemp_Hex_H, A
+	return
