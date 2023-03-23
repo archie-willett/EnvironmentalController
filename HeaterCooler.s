@@ -26,9 +26,17 @@ res_H:		ds 1
 	    K_I_H EQU 0x00
 	    K_D_L EQU 0x00
 	    K_D_H EQU 0x00
+ 
+	    DEN	  EQU 0
+	    IN0	  EQU 1
 	    
 psect	heater_cooler_code,class=CODE
 
+;Heater_Setup:
+;	bcf	TRISJ, IN0, A
+;	bsf	TRISJ, DEN, A
+;	return
+ 
 Addition_16bit:
 	movf	L1, W, A
 	addwf	L2, W, A

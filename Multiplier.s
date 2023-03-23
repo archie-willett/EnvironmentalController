@@ -186,12 +186,8 @@ Calibrate:
 	movlw	cal_H
 	movwf	H2, A
 	call	Mult_16x16
-	movlw	0x00
-	movwf	TempVal_Hex_H, A
-	movlw	0xFF
-	movwf	TempVal_Hex_L, A
-;	movff	res2, TempVal_Hex_H, A
-;	movff	res1, TempVal_Hex_L, A
+	movff	res2, TempVal_Hex_H, A
+	movff	res1, TempVal_Hex_L, A
 ;	movlw	cal_offset_L
 ;	subwfb	H1, F, A
 	return

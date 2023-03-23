@@ -587,12 +587,18 @@ GLCD_Compare_Small_Loop:
 	addwfc	GLCD_comp_h, F, A
 	movf	GLCD_comp_h, W, A
 	cpfsgt	temp_hex_h, A
-	bra	GLCD_Compare_Small_Loop_Lower
+	bra	GLCD_Compare_Small_Loop_LessEqual
 	bra	GLCD_Compare_Small_Loop
+GLCD_Compare_Small_Loop_LessEqual:
+	cpfslt	temp_hex_h, A
+	bra	GLCD_Compare_Small_Loop_Lower
+	bra	GLCD_Compare_Small_Loop_End
 GLCD_Compare_Small_Loop_Lower:
 	movf	GLCD_comp_l, W, A
-	cpfslt	temp_hex_l, A
+	cpfsgt	temp_hex_l, A
+	bra	GLCD_Compare_Small_Loop_End
 	bra	GLCD_Compare_Small_Loop
+GLCD_Compare_Small_Loop_End:
 	movf	GLCD_comp_counter, W, A
 	call	GLCD_Set_Page
 	movf	GLCD_bar_loc, W, A  ; not sure if you already did this
