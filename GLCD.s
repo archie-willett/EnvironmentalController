@@ -5,7 +5,7 @@ global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
 global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
 global	GLCD_3,GLCD_0,GLCD_5;,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
-global	GLCD_Update_Bars, GLCD_Update_Bars_Setup
+global	GLCD_Update_Bars, GLCD_Update_Bars_Setup, GLCD_ct
 
 extrn	Avg16val_and_Calibrate, current_temperature
 extrn	H1, L1, TempVal_Hex_H, TempVal_Hex_L
@@ -90,7 +90,7 @@ GLCD_Setup:
 	
 	movlw	00100010B
 	movwf	GLCD_Axis_p1_S, A
-	movlw	10101010B
+	movlw	01000000B
 	movwf	GLCD_Axis_p1_W, A
 	movlw	00000010B
 	movwf	GLCD_Axis_p2_S, A
@@ -278,6 +278,19 @@ GLCD_p:
 	call	GLCD_Write_Data
 	return	
 	
+GLCD_ct:
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	movlw	00000110B
+	call	GLCD_Write_Data
+	movlw	00001001B
+	call	GLCD_Write_Data
+	movlw	00001001B
+	call	GLCD_Write_Data
+	return
+	
 GLCD_c:
 	movlw	00000010B
 	call	GLCD_Write_Data
@@ -332,9 +345,9 @@ GLCD_M:
 	return
 	
 GLCD_axis:	
-	rrncf	GLCD_Axis_p1_W, F, A
-	;rlncf	GLCD_Axis_p1_W, A
-	rrncf	GLCD_Axis_p2_W, F, A
+	rlncf	GLCD_Axis_p1_W, F, A
+	rlncf	GLCD_Axis_p1_W, F, A
+	;rrncf	GLCD_Axis_p2_W, F, A
 	;rlncf	GLCD_Axis_p2_W, A
 	
 	movf	GLCD_Axis_p1_W, W, A
@@ -349,6 +362,7 @@ GLCD_axis:
 ;	movf	GLCD_Axis_p2, W, A
 ;	call	GLCD_Write_Data
 	return
+	
 	
 GLCD_Space:
 	movwf	GLCD_cnt_ms, A
@@ -379,13 +393,13 @@ space_loop:
 ;	call	GLCD_Write_Data
 ;	return
 GLCD_3:
-	movlw	00010001B
+	movlw	01010001B
 	call	GLCD_Write_Data
-	movlw	00010101B
+	movlw	01010101B
 	call	GLCD_Write_Data
-	movlw	00011111B
+	movlw	01011111B
 	call	GLCD_Write_Data
-	movlw	00000000B
+	movlw	01000000B
 	call	GLCD_Write_Data
 	return
 ;GLCD_4:
@@ -399,7 +413,7 @@ GLCD_3:
 ;	call	GLCD_Write_Data
 ;	return
 GLCD_5:	
-	movlw	00010111B
+	movlw	01010111B
 	call	GLCD_Write_Data
 	movlw	00010101B
 	call	GLCD_Write_Data
@@ -514,7 +528,7 @@ GLCD_Print_Clear_Bar:
 	
 GLCD_Compare:
 	movff	GLCD_loc, GLCD_bar_loc, A
-	movlw	105
+	movlw	100
 	movwf	GLCD_comp_l, A
 	clrf	GLCD_comp_h, A
 	movlw	0x07
@@ -524,7 +538,7 @@ GLCD_Compare_Loop:
 	bra	GLCD_Compare_Loop_Main
 	bra	GLCD_Compare_End
 GLCD_Compare_Loop_Main:
-	movlw	50
+	movlw	40
 	addwf	GLCD_comp_l, F, A
 	movlw	0
 	addwfc	GLCD_comp_h, F, A
@@ -538,13 +552,18 @@ GLCD_Compare_Loop_Higher:
 	goto	GLCD_Compare_Small
 GLCD_Compare_Loop_Lower:
 	movf	GLCD_comp_l, W, A
-	cpfsgt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
+	cpfslt	temp_hex_l, A	    ;   ADC temperature lower byte (hex)
+	bra	GLCD_Compare_Loop_Lower_Full_Bar
 	bra	GLCD_Compare_Small
+GLCD_Compare_Loop_Lower_Full_Bar:
 	call	GLCD_Print_Full_Bar
+	movf	GLCD_comp_l, W, A
+	cpfseq	temp_hex_l, A
 	bra	GLCD_Compare_Loop
+	bra	GLCD_Empty_Bar
 
 GLCD_Compare_Small:
-	movlw	50		    
+	movlw	40		    
 	subwf	GLCD_comp_l, F, A   
 	movlw	0
 	subwfb	GLCD_comp_h, F, A
@@ -555,6 +574,7 @@ GLCD_Compare_Small:
 	bra	GLCD_Compare_Remainder_Lower
 	bra	GLCD_Compare_Small_Loop
 GLCD_Compare_Remainder_Lower:
+	movf	GLCD_comp_l, W, A
 	cpfsgt	temp_hex_l, A
 	goto	GLCD_Empty_Bar		    
 GLCD_Compare_Small_Loop:

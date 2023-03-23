@@ -1,18 +1,30 @@
 #include <xc.inc>
     
 global	GLCD_Temp_Val_setup, GLCD_Current_Temperature
+global	GLCD_Print_Goal_Temperature
     
-extrn	  TempVal_Dec_H, TempVal_Dec_L, GLCD_Write_Data, GLCD_Right
-extrn	  GLCD_Set_Page, GLCD_Set_Y
+extrn	  TempVal_Dec_H, TempVal_Dec_L, GoalTemp_Dec_H, GoalTemp_Dec_L
+extrn	  GoalTemp_Hex_H, GoalTemp_Hex_L
+extrn	  GLCD_Set_Page, GLCD_Set_Y, GLCD_Write_Data, GLCD_Right
     
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 NumberArray:    ds 0x1E ; reserve 30 bytes for numbers
 
-    
+;psect	udata_acs
+;GLCD_temp_compare:	    ds 1
+;GLCD_temp_compare_counter:  ds 1
+;GLCD_temp_compare_inc:  ds 1
+;PrintTemp_Dec_H:	ds 1
+;PrintTemp_Dec_L:	ds 1
+;PrintTemp_Y:		ds 1
+
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_temp_compare:	    ds 1
 GLCD_temp_compare_counter:  ds 1
 GLCD_temp_compare_inc:  ds 1
+PrintTemp_Dec_H:	ds 1
+PrintTemp_Dec_L:	ds 1
+PrintTemp_Y:		ds 1
 counter:    ds 1    ; reserve one byte for a counter variable
 
 psect	data    
@@ -52,18 +64,29 @@ loop: 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	bra	loop		; keep going until finished
 	return
 
+GLCD_Print_Goal_Temperature:
+	movff	GoalTemp_Dec_H, PrintTemp_Dec_H, A
+	movff	GoalTemp_Dec_L, PrintTemp_Dec_L, A
+	movlw	18
+	movwf	PrintTemp_Y, A
+	bra	GLCD_Print_Temperature
 GLCD_Current_Temperature:
+	movff	TempVal_Dec_H, PrintTemp_Dec_H, A
+	movff	TempVal_Dec_L, PrintTemp_Dec_L, A
+	movlw	37
+	movwf	PrintTemp_Y, A
+	bra	GLCD_Print_Temperature
+GLCD_Print_Temperature:
 	movlw	0
 	call	GLCD_Set_Page
-	movlw	21
+	movf	PrintTemp_Y, W, A
 	call	GLCD_Set_Y
-    
-	movff	TempVal_Dec_H, GLCD_temp_compare, A
+	movff	PrintTemp_Dec_H, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, F, A
 	call	GLCD_Current_Temp_Compare
 	
-	movff	TempVal_Dec_L, GLCD_temp_compare, A
+	movff	PrintTemp_Dec_L, GLCD_temp_compare, A
 	movlw	0xF0
 	andwf	GLCD_temp_compare, F, A
 	swapf	GLCD_temp_compare, F, A
@@ -74,7 +97,7 @@ GLCD_Current_Temperature:
 	movlw	00000000B
 	call	GLCD_Write_Data
 	
-	movff	TempVal_Dec_L, GLCD_temp_compare, A
+	movff	PrintTemp_Dec_L, GLCD_temp_compare, A
 	movlw	0x0F
 	andwf	GLCD_temp_compare, F, A
 	call	GLCD_Current_Temp_Compare
