@@ -2,7 +2,7 @@
     
 global	Mult_16x16,   Mult_24x8, DCon4Dig, Convert_Hex_ASCII
 global	Avg16val_and_Calibrate
-global	U1, H1, L1, H2, L2
+global	U1, H1, L1, H2, L2, res0, res1
 global	TempVal_Dec_H, TempVal_Dec_L, TempVal_Hex_H, TempVal_Hex_L
 global	Convert_GoalTemp_Dec2Hex, GoalTemp_Hex_H, GoalTemp_Hex_L
 global	Collect_and_Process_Temperature
@@ -22,6 +22,8 @@ TempVal_Dec_H: ds 1
 TempVal_Dec_L: ds 1
 TempVal_Hex_H:	ds 1
 TempVal_Hex_L:	ds 1
+GoalTemp_Hex_L:	ds 1
+GoalTemp_Hex_H:	ds 1
     
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 res3:	ds 1

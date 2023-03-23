@@ -24,6 +24,10 @@ temp_hex_l:	ds 1
 GLCD_comp_counter:   ds 1
 GLCD_graph_line:    ds 1
 GLCD_bar_height:    ds 1
+GLCD_Axis_p1_S:	ds 1
+GLCD_Axis_p1_W:	ds 1
+GLCD_Axis_p2_S:	ds 1
+GLCD_Axis_p2_W:	ds 1
 
 GLCD_update_bars_inc: ds 1
 GLCD_update_bars_new: ds 1
@@ -36,6 +40,7 @@ PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
 GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
 GLCD_counterx:  ds 1	;
+
 ;GLCD_update_bars_inc: ds 1
 ;GLCD_update_bars_new: ds 1
 ;GLCD_update_bars_counter: ds 1
@@ -82,6 +87,15 @@ GLCD_Setup:
 	call	GLCD_Instruction
 	movlw	1		; wait 40us
 	call	GLCD_delay_x4us
+	
+	movlw	00100010B
+	movwf	GLCD_Axis_p1_S, A
+	movlw	10101010B
+	movwf	GLCD_Axis_p1_W, A
+	movlw	00000010B
+	movwf	GLCD_Axis_p2_S, A
+	movlw	00000000B
+	movwf	GLCD_Axis_p2_W, A
 	return
 
 GLCD_Clear_Display:
@@ -317,17 +331,23 @@ GLCD_M:
 	call	GLCD_Write_Data
 	return
 	
-GLCD_axis:
-	movlw	00010001B
+GLCD_axis:	
+	rrncf	GLCD_Axis_p1_W, F, A
+	;rlncf	GLCD_Axis_p1_W, A
+	rrncf	GLCD_Axis_p2_W, F, A
+	;rlncf	GLCD_Axis_p2_W, A
+	
+	movf	GLCD_Axis_p1_W, W, A
 	call	GLCD_Write_Data
-	movlw	00010001B
+	movf	GLCD_Axis_p1_W, W, A
 	call	GLCD_Write_Data
-	movlw	00010001B
+	movf	GLCD_Axis_p1_W, W, A
 	call	GLCD_Write_Data
-	movlw	00000001B
-	call	GLCD_Write_Data
-	movlw	00000001B
-	call	GLCD_Write_Data
+	
+;	movf	GLCD_Axis_p2, W, A
+;	call	GLCD_Write_Data
+;	movf	GLCD_Axis_p2, W, A
+;	call	GLCD_Write_Data
 	return
 	
 GLCD_Space:
@@ -461,7 +481,7 @@ GLCD_Full_Bar_Loop:
 	return
 	
 GLCD_Clear_Bar_Page:
-	movlw	11
+	movlw	9
 	movwf	GLCD_counterx, A
 GLCD_Clear_Bar_Loop:	
 	movlw	0x0
@@ -471,27 +491,42 @@ GLCD_Clear_Bar_Loop:
 	return
 	
 GLCD_Clear_Bar:
-	decf	GLCD_comp_counter, A
+	decfsz	GLCD_comp_counter, A
+	bra	GLCD_Print_Clear_Bar
+	return
+GLCD_Print_Clear_Bar:
+	movf	GLCD_bar_loc, W, A
+	call	GLCD_Set_Y
 	movf	GLCD_comp_counter, W, A
 	call	GLCD_Set_Page
-	movlw	1
-	cpfsgt	GLCD_comp_counter, A
-	bra	GLCD_Clear_Bar
 	call	GLCD_Clear_Bar_Page
-	return
+	bra	GLCD_Clear_Bar
+	
+;GLCD_Clear_Bar:
+;	decf	GLCD_comp_counter, A
+;	movf	GLCD_comp_counter, W, A
+;	call	GLCD_Set_Page
+;	movlw	1
+;	cpfsgt	GLCD_comp_counter, A
+;	bra	GLCD_Clear_Bar
+;	call	GLCD_Clear_Bar_Page
+;	return
 	
 GLCD_Compare:
 	movff	GLCD_loc, GLCD_bar_loc, A
-	movlw	0x6E
+	movlw	105
 	movwf	GLCD_comp_l, A
 	clrf	GLCD_comp_h, A
 	movlw	0x07
 	movwf	GLCD_comp_counter, A
 GLCD_Compare_Loop:
-	decf	GLCD_comp_counter, F, A
-	movlw	0x32
+	decfsz	GLCD_comp_counter, F, A
+	bra	GLCD_Compare_Loop_Main
+	bra	GLCD_Compare_End
+GLCD_Compare_Loop_Main:
+	movlw	50
 	addwf	GLCD_comp_l, F, A
-	movlw	0x00
+	movlw	0
 	addwfc	GLCD_comp_h, F, A
 	movf	GLCD_comp_h, W, A
 	cpfsgt	temp_hex_h, A	    ;   ADC temperature higher byte (hex)
@@ -507,10 +542,11 @@ GLCD_Compare_Loop_Lower:
 	bra	GLCD_Compare_Small
 	call	GLCD_Print_Full_Bar
 	bra	GLCD_Compare_Loop
+
 GLCD_Compare_Small:
-	movlw	0x32		    
+	movlw	50		    
 	subwf	GLCD_comp_l, F, A   
-	movlw	0x00
+	movlw	0
 	subwfb	GLCD_comp_h, F, A
 	movlw	00000000B
 	movwf	GLCD_graph_line, A
@@ -544,9 +580,11 @@ GLCD_Compare_Small_Loop_Lower:
 	movf	GLCD_graph_line, W, A
 	call	GLCD_Partial_Bar
 GLCD_Empty_Bar:
-	movf	GLCD_bar_loc, W, A
-	call	GLCD_Set_Y
 	call	GLCD_Clear_Bar
+GLCD_Compare_End:
+	movlw	0
+	call	GLCD_Write_Data
+	call	GLCD_Write_Data
 	return
 
 GLCD_Print_Full_Bar:

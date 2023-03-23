@@ -1,14 +1,13 @@
 #include <xc.inc>
 
-
 extrn	TempVal_Hex_H, TempVal_Hex_L, GoalTemp_Hex_H, GoalTemp_Hex_L
-extrn	H1, L1, H2, L2
+extrn	H1, L1, H2, L2, res0, res1
 
 psect	udata_acs   ; named variables in access ram
 OnOff_Switch:	    ds 1 ; bit 0 - On/Off Controller, bit 1 - P Controller
 Proportional_Bit:   ds 1
 P_Controller_OnOff_Switch: ds 1
-	
+
 	
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 proportional_L: ds 1
@@ -49,7 +48,7 @@ Subtraction_16bit:
 	return
 
 OnOff_Controller:
-	btfsc	OnOff_Switch
+	btfsc	OnOff_Switch, 1, A
 	bra	Controller_On
 	bra	Controller_Off
 Controller_Off:

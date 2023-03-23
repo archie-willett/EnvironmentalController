@@ -17,8 +17,8 @@ HH:	ds 1
 HL:	ds 1
 LH:	ds 1
 LL:	ds 1
-CheckH: ds 1
-CheckL: ds 1
+GoalTemp_Dec_L:	ds 1
+GoalTemp_Dec_H:	ds 1
 KeyPad_delay: ds 1
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
