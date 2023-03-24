@@ -4,8 +4,9 @@ global	current_temperature
 extrn   GLCD_Setup, UART_Setup, ADC_Setup, GLCD_Update_Bars_Setup
 extrn	GLCD_Setup_Axis, GLCD_Temp_Val_setup
 extrn	UART_Send_Temperature, GLCD_Current_Temperature, GLCD_Update_Bars
-extrn	Collect_and_Process_Temperature
+extrn	Collect_and_Process_Temperature, Collect_Initial_Temperature
 extrn	KeyPad_check, KeyPad_init
+extrn	Heater_Setup, OnOff_Controller
 
 	
 psect	code, abs
@@ -23,7 +24,10 @@ setup:
 	call	GLCD_Temp_Val_setup
 	call	GLCD_Update_Bars_Setup
 	call	KeyPad_init
+	call	Heater_Setup
+	call	Collect_Initial_Temperature
 current_temperature:
+	call	OnOff_Controller
 	call	KeyPad_check
 	call	Collect_and_Process_Temperature
 	call	UART_Send_Temperature

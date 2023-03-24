@@ -50,10 +50,10 @@ UART_Send_Temperature:
     call    UART_Transmit_Byte
     movf    TempVal_Dec_L, W, A
     call    UART_Write_Hex_Nib_Low
-    movlw   0xBA
-    call    UART_Transmit_Byte
-    movlw   'C'
-    call    UART_Transmit_Byte
+;    movlw   0xBA
+;    call    UART_Transmit_Byte
+;    movlw   'C'
+;    call    UART_Transmit_Byte
     movlw   0x0D
     call    UART_Transmit_Byte
     movlw   0x0A

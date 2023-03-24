@@ -5,11 +5,12 @@ global	Avg16val_and_Calibrate
 global	U1, H1, L1, H2, L2, res0, res1
 global	TempVal_Dec_H, TempVal_Dec_L, TempVal_Hex_H, TempVal_Hex_L
 global	Convert_GoalTemp_Dec2Hex, GoalTemp_Hex_H, GoalTemp_Hex_L
-global	Collect_and_Process_Temperature
+global	Collect_and_Process_Temperature, Collect_Initial_Temperature
 
 extrn	ADC_Read
 extrn	delay_x1ms
-extrn	GoalTemp_Dec_H, GoalTemp_Dec_L, Print
+extrn	GoalTemp_Dec_H, GoalTemp_Dec_L ; , Print
+extrn	GLCD_Print_Goal_Temperature, GLCD_Current_Temperature
 
     
 psect	udata_acs   ; named variables in access ram
@@ -99,11 +100,20 @@ Collect_and_Process_Temperature:
 	call	Avg16val_and_Calibrate
 	call	DCon4Dig
 	return
+
+Collect_Initial_Temperature:
+	call	Collect_and_Process_Temperature
+	movff	TempVal_Dec_H, GoalTemp_Dec_H, A
+	movff	TempVal_Dec_L, GoalTemp_Dec_L, A
+	movff	TempVal_Hex_H, GoalTemp_Hex_H, A
+	movff	TempVal_Hex_L, GoalTemp_Hex_L, A
+	call	GLCD_Print_Goal_Temperature
+	call	GLCD_Current_Temperature
+	return
 	
 DCon4Dig: 
 	movff	TempVal_Hex_H, H1, A
 	movff	TempVal_Hex_L, L1, A
-	
 	movlw	dec_L
 	movwf	L2, A
 	movlw	dec_H

@@ -73,7 +73,7 @@ GLCD_Print_Goal_Temperature:
 GLCD_Current_Temperature:
 	movff	TempVal_Dec_H, PrintTemp_Dec_H, A
 	movff	TempVal_Dec_L, PrintTemp_Dec_L, A
-	movlw	37
+	movlw	38
 	movwf	PrintTemp_Y, A
 	bra	GLCD_Print_Temperature
 GLCD_Print_Temperature:

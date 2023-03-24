@@ -1,5 +1,7 @@
 #include <xc.inc>
 
+global	Heater_Setup, OnOff_Controller    
+    
 extrn	TempVal_Hex_H, TempVal_Hex_L, GoalTemp_Hex_H, GoalTemp_Hex_L
 extrn	H1, L1, H2, L2, res0, res1
 
@@ -19,7 +21,7 @@ derivative_H:	ds 1
 res_L:		ds 1
 res_H:		ds 1
 	    
-	    OnOff_Threshold EQU	20  ;	threshold to activate is 2 degrees
+	    OnOff_Threshold EQU	10  ;	threshold to activate is 2 degrees
 	    K_P_L EQU 0x00
 	    K_P_H EQU 0x00
 	    K_I_L EQU 0x00
@@ -33,8 +35,8 @@ res_H:		ds 1
 psect	heater_cooler_code,class=CODE
 
 Heater_Setup:
-	clrf	LATF, A
-	clrf	TRISF, A
+	clrf	LATH, A
+	clrf	TRISH, A
 	return
  
 Addition_16bit:
@@ -56,16 +58,16 @@ Subtraction_16bit:
 	return
 
 OnOff_Controller:
-	btfsc	OnOff_Switch, 1, A
+	btfsc	LATH, 0, A
 	bra	Controller_On
 	bra	Controller_Off
-Controller_Off:
+Controller_On:
 	movff	TempVal_Hex_L, L1, A
 	movff	TempVal_Hex_H, H1, A
 	movff	GoalTemp_Hex_L, L2, A
 	movff	GoalTemp_Hex_H, H2, A
 	bra	Compare_Temp_vs_Goal
-Controller_On:
+Controller_Off:
 	movff	TempVal_Hex_L, L2, A
 	movff	TempVal_Hex_H, H2, A
 	movff	GoalTemp_Hex_L, L1, A
@@ -80,7 +82,7 @@ Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - 2
 	bnn	Switch_OnOff
 	return
 Switch_OnOff:
-	btg	OnOff_Switch, 0, A
+	btg	LATH, 0, A
 	return
 	
 

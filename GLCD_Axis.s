@@ -84,7 +84,7 @@ current_temperature_setup:
 	call	GLCD_Set_Y
 	movlw	00011111B
 	call	GLCD_Write_Data
-	movlw	52
+	movlw	53
 	call	GLCD_Set_Y
 	call	GLCD_ct
 	return
