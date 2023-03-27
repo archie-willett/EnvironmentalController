@@ -7,6 +7,7 @@ extrn	UART_Send_Temperature, GLCD_Current_Temperature, GLCD_Update_Bars
 extrn	Collect_and_Process_Temperature, Collect_Initial_Temperature
 extrn	KeyPad_check, KeyPad_init
 extrn	Heater_Setup, OnOff_Controller, P_Controller, Fan_PWM_Interrupt
+extrn	Fan_PWM_Interrupt_Setup
 
 	
 psect	code, abs
@@ -14,10 +15,10 @@ psect	code, abs
 main:
 	org	0x0
 	goto	setup
-;int_hi:	org	0x0008	; high vector, no low vector
-;	goto	Fan_PWM_Interrupt
+int_hi:	org	0x0008	; high vector, no low vector
+	goto	Fan_PWM_Interrupt
 
-	org	0x100		    ; Main code starts here at address 0x100
+	;org	0x100		    ; Main code starts here at address 0x100
 setup:
 	call	GLCD_Setup
 	call	ADC_Setup
@@ -28,11 +29,12 @@ setup:
 	call	KeyPad_init
 	call	Heater_Setup
 	call	Collect_Initial_Temperature
+	call	Fan_PWM_Interrupt_Setup
 current_temperature:
-;	call	P_Controller
-	call	OnOff_Controller
+;	call	OnOff_Controller
 	call	KeyPad_check
 	call	Collect_and_Process_Temperature
+	call	P_Controller
 	call	UART_Send_Temperature
 	call	GLCD_Current_Temperature
 bar:

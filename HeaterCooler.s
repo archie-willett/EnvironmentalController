@@ -92,44 +92,53 @@ Switch_OnOff:
 	
 
 P_Controller:
-	movff	TempVal_Hex_L, L1, A
-	movff	TempVal_Hex_H, H1, A
-	movff	GoalTemp_Hex_L, L2, A
-	movff	GoalTemp_Hex_H, H2, A
+	movff	TempVal_Hex_L, L2, A
+	movff	TempVal_Hex_H, H2, A
+	movff	GoalTemp_Hex_L, L1, A
+	movff	GoalTemp_Hex_H, H1, A
 	call	Subtraction_16bit
 	bn	P_Controller_Turn_Off
+P_Controller_Turn_On:
 	movff	res0, Proportional_Bit, A
-	movlw	31
-	cpfsgt	Proportional_Bit, A
+	btfsc	TMR0IE
 	return
-	movwf	Proportional_Bit, A
-	btfss	TMR0IE
 	bsf	TMR0IE
+	clrf	PWM_Interrupt_Counter_Duty, A
+	clrf	PWM_Interrupt_Counter_Period, A
 	return
 P_Controller_Turn_Off:
 	clrf	Proportional_Bit, A
-	btfsc	TMR0IE
+	btfss	TMR0IE
+	return
 	bcf	TMR0IE
+	clrf	PWM_Interrupt_Counter_Duty, A
+	clrf	PWM_Interrupt_Counter_Period, A
 	return
 	
 Fan_PWM_Interrupt_Setup:
 	movlw	11000010B   ; interrupts every 128us
 	movwf	T0CON, A
 	bsf	GIE
-	call	P_Controller
+	movlw	0x02
+	movwf	Proportional_Bit, A
+	movwf	Proportional_Bit_Interrupt, A
 	clrf	PWM_Interrupt_Counter_Duty, A
 	clrf	PWM_Interrupt_Counter_Period, A
+	bsf	TMR0IE
 	return
 	
 	
 Fan_PWM_Interrupt:
 	incf	PWM_Interrupt_Counter_Duty, A
 	incf	PWM_Interrupt_Counter_Period, A
+	clrf	WREG, A
+	cpfsgt	Proportional_Bit_Interrupt, A
+	bra	Fan_PWM_Interrupt_Turn_Off_Fan
 	movf	Proportional_Bit_Interrupt, W, A
 	cpfseq	PWM_Interrupt_Counter_Duty, A
 	bra 	Fan_PWM_Interrupt_Period
 Fan_PWM_Interrupt_Turn_Off_Fan:
-	bcf	LATH, 0, A
+ 	bcf	LATH, 0, A
 Fan_PWM_Interrupt_Period:
 	movlw	31
 	cpfseq	PWM_Interrupt_Counter_Period, A
@@ -142,4 +151,6 @@ Fan_PWM_Interrupt_Turn_On_Fan:
 Fan_PWM_Interrupt_Reset:
 	bcf	TMR0IF
 	retfie	f
+
+	
 	
