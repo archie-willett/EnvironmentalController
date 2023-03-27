@@ -1,14 +1,19 @@
 #include <xc.inc>
 
-global	Heater_Setup, OnOff_Controller    
+global	Heater_Setup, OnOff_Controller, Fan_PWM_Interrupt_Setup
+global	Fan_PWM_Interrupt, P_Controller
     
 extrn	TempVal_Hex_H, TempVal_Hex_L, GoalTemp_Hex_H, GoalTemp_Hex_L
 extrn	H1, L1, H2, L2, res0, res1
 
 psect	udata_acs   ; named variables in access ram
-OnOff_Switch:	    ds 1 ; bit 0 - On/Off Controller, bit 1 - P Controller
+OnOff_Switch:	    ds 1 ; bit 0 - On/Off Controller
 Proportional_Bit:   ds 1
-P_Controller_OnOff_Switch: ds 1
+Proportional_Bit_Interrupt:	ds 1
+P_Controller_OnOff_Switch:	ds 1
+PWM_Interrupt_Counter_Period:   ds 1
+PWM_Interrupt_Counter_Duty:	ds 1
+
 
 	
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
@@ -21,7 +26,7 @@ derivative_H:	ds 1
 res_L:		ds 1
 res_H:		ds 1
 	    
-	    OnOff_Threshold EQU	10  ;	threshold to activate is 2 degrees
+	    OnOff_Threshold EQU	10  ;	threshold to activate is 1 degree
 	    K_P_L EQU 0x00
 	    K_P_H EQU 0x00
 	    K_I_L EQU 0x00
@@ -92,14 +97,49 @@ P_Controller:
 	movff	GoalTemp_Hex_L, L2, A
 	movff	GoalTemp_Hex_H, H2, A
 	call	Subtraction_16bit
-	bn	P_Controller_Off
+	bn	P_Controller_Turn_Off
 	movff	res0, Proportional_Bit, A
+	movlw	31
+	cpfsgt	Proportional_Bit, A
+	return
+	movwf	Proportional_Bit, A
+	btfss	TMR0IE
+	bsf	TMR0IE
 	return
 P_Controller_Turn_Off:
 	clrf	Proportional_Bit, A
+	btfsc	TMR0IE
+	bcf	TMR0IE
+	return
+	
+Fan_PWM_Interrupt_Setup:
+	movlw	11000010B   ; interrupts every 128us
+	movwf	T0CON, A
+	bsf	GIE
+	call	P_Controller
+	clrf	PWM_Interrupt_Counter_Duty, A
+	clrf	PWM_Interrupt_Counter_Period, A
 	return
 	
 	
-
-
-
+Fan_PWM_Interrupt:
+	incf	PWM_Interrupt_Counter_Duty, A
+	incf	PWM_Interrupt_Counter_Period, A
+	movf	Proportional_Bit_Interrupt, W, A
+	cpfseq	PWM_Interrupt_Counter_Duty, A
+	bra 	Fan_PWM_Interrupt_Period
+Fan_PWM_Interrupt_Turn_Off_Fan:
+	bcf	LATH, 0, A
+Fan_PWM_Interrupt_Period:
+	movlw	31
+	cpfseq	PWM_Interrupt_Counter_Period, A
+	bra	Fan_PWM_Interrupt_Reset
+Fan_PWM_Interrupt_Turn_On_Fan:
+	bsf	LATH, 0, A
+	movff	Proportional_Bit, Proportional_Bit_Interrupt, A
+	clrf	PWM_Interrupt_Counter_Duty, A
+	clrf	PWM_Interrupt_Counter_Period, A
+Fan_PWM_Interrupt_Reset:
+	bcf	TMR0IF
+	retfie	f
+	
