@@ -26,7 +26,8 @@ derivative_H:	ds 1
 res_L:		ds 1
 res_H:		ds 1
 	    
-	    OnOff_Threshold EQU	10  ;	threshold to activate is 1 degree
+	    OnOff_Threshold_Off EQU	10  ;	threshold to activate is 1 degree
+	    OnOff_Threshold_On EQU	0  
 	    K_P_L EQU 0x00
 	    K_P_H EQU 0x00
 	    K_I_L EQU 0x00
@@ -71,16 +72,17 @@ Controller_On:
 	movff	TempVal_Hex_H, H1, A
 	movff	GoalTemp_Hex_L, L2, A
 	movff	GoalTemp_Hex_H, H2, A
+	movlw	OnOff_Threshold_On
 	bra	Compare_Temp_vs_Goal
 Controller_Off:
 	movff	TempVal_Hex_L, L2, A
 	movff	TempVal_Hex_H, H2, A
 	movff	GoalTemp_Hex_L, L1, A
 	movff	GoalTemp_Hex_H, H1, A
+	movlw	OnOff_Threshold_Off
 	bra	Compare_Temp_vs_Goal
-Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - 2
-	movlw	OnOff_Threshold	    ;On-Off when Temp > GoalTemp + 2
-	subwf	L2, F, A
+Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - 1	    
+	subwf	L2, F, A	    ;On-Off when Temp > GoalTemp + 1
 	clrf	WREG, A
 	subwfb	H2, F, A
 	call	Subtraction_16bit

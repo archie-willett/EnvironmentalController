@@ -14,9 +14,6 @@ psect	code, abs
 main:
 	org	0x0
 	goto	setup
-;int_hi:	org	0x0008	; high vector, no low vector
-;	goto	Fan_PWM_Interrupt
-
 	org	0x100		    ; Main code starts here at address 0x100
 setup:
 	call	GLCD_Setup
@@ -29,7 +26,6 @@ setup:
 	call	Heater_Setup
 	call	Collect_Initial_Temperature
 current_temperature:
-;	call	P_Controller
 	call	OnOff_Controller
 	call	KeyPad_check
 	call	Collect_and_Process_Temperature
