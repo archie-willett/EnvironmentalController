@@ -1,2 +1,2 @@
-# Envinronmental Controller - On-Off Temperature Control
-Final version of the On-Off Temperature Controller
+# Envinronmental Controller - Proportional Temperature Control
+Final version of the Proportional Temperature Controller
