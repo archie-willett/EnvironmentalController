@@ -1,14 +1,14 @@
 #include <xc.inc>
 extrn   GLCD_Setup, GLCD_Write_Data, GLCD_Tt, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb ; GLCD_Bar
-extrn	GLCD_3,GLCD_0,GLCD_5;,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb, GLCD_Bar
+extrn	GLCD_3,GLCD_0,GLCD_5,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 extrn	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_ct
  
 global	GLCD_Setup_Axis
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
-page_counter:	ds 1	; reserve 1 byte for counting through nessage	
+page_counter:	ds 1	; reserve 1 byte for tracking page number
 
     
     
@@ -18,8 +18,6 @@ temperature:
 	call	GLCD_Left
 	call	GLCD_3
 	call	GLCD_5
-;	movlw	0x0
-;	call	GLCD_Write_Data
 	call	GLCD_ct
 axis:	
 	movlw	2

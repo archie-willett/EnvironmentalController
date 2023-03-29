@@ -76,8 +76,8 @@ KeyPad_Confirm_init:
 Confirm_message_read_loop: 	
 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter, A		; count down to zero
-	bra	Confirm_message_read_loop		; keep going until finished
+	decfsz	counter, A			; count down to zero
+	bra	Confirm_message_read_loop	; keep going until finished
 	return
 	
 KeyPad_confirm:

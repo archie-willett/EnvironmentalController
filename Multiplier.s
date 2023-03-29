@@ -198,8 +198,6 @@ Calibrate:
 	call	Mult_16x16
 	movff	res2, TempVal_Hex_H, A
 	movff	res1, TempVal_Hex_L, A
-;	movlw	cal_offset_L
-;	subwfb	H1, F, A
 	return
 	
 Dec2Hex_Converter:

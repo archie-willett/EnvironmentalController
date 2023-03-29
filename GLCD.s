@@ -2,15 +2,15 @@
 
 global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt ; GLCD_Bar
-global	GLCD_3,GLCD_0,GLCD_5;,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
+global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt, GLCD_Bar
+global	GLCD_3,GLCD_0,GLCD_5,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
 global	GLCD_Update_Bars, GLCD_Update_Bars_Setup, GLCD_ct
 
 extrn	Avg16val_and_Calibrate, current_temperature
 extrn	H1, L1, TempVal_Hex_H, TempVal_Hex_L
     
-psect	udata_acs   ; named variables in access ram
+psect	udata_acs   
 GLCD_cnt_l:	ds 1	; reserve 1 byte for variable LCD_cnt_l
 GLCD_cnt_h:	ds 1	; reserve 1 byte for variable LCD_cnt_h
 GLCD_cnt_ms:	ds 1	; reserve 1 byte for ms counter
@@ -40,10 +40,6 @@ PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_hex_tmp:	ds 1    ; reserve 1 byte for variable LCD_hex_tmp
 GLCD_countery:	ds 1	; reserve 1 byte for counting through nessage
 GLCD_counterx:  ds 1	;
-
-;GLCD_update_bars_inc: ds 1
-;GLCD_update_bars_new: ds 1
-;GLCD_update_bars_counter: ds 1
     
 	GLCD_CS1 EQU 0	; column left
 	GLCD_CS2 EQU 1	; column right

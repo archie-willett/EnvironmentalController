@@ -7,16 +7,8 @@ extrn	  TempVal_Dec_H, TempVal_Dec_L, GoalTemp_Dec_H, GoalTemp_Dec_L
 extrn	  GoalTemp_Hex_H, GoalTemp_Hex_L
 extrn	  GLCD_Set_Page, GLCD_Set_Y, GLCD_Write_Data, GLCD_Right
     
-psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
-NumberArray:    ds 0x1E ; reserve 30 bytes for numbers
-
-;psect	udata_acs
-;GLCD_temp_compare:	    ds 1
-;GLCD_temp_compare_counter:  ds 1
-;GLCD_temp_compare_inc:  ds 1
-;PrintTemp_Dec_H:	ds 1
-;PrintTemp_Dec_L:	ds 1
-;PrintTemp_Y:		ds 1
+psect	udata_bank4
+NumberArray:    ds 0x1E ; reserve 30 bytes for GLCD numbers
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 GLCD_temp_compare:	    ds 1
@@ -25,7 +17,7 @@ GLCD_temp_compare_inc:  ds 1
 PrintTemp_Dec_H:	ds 1
 PrintTemp_Dec_L:	ds 1
 PrintTemp_Y:		ds 1
-counter:    ds 1    ; reserve one byte for a counter variable
+counter:    ds 1
 
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****

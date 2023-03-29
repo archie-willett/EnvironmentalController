@@ -1,10 +1,10 @@
 #include <xc.inc>
 global	delay_x1ms, delay_x4us, delay_x250ns
   
-psect	udata_acs   ; reserve data space in access ram
-delay_cnt_ms:   ds 1    ; reserve one byte for a counter variable
+psect	udata_acs
+delay_cnt_ms:   ds 1
 delay_cnt_l:	ds 1
-delay_cnt_h:	ds 1; reserve one byte for a counter variable
+delay_cnt_h:	ds 1
     
 psect	delay_code, class=CODE
 delay_x1ms:		    ; delay given in ms in W

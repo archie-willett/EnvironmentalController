@@ -18,7 +18,6 @@ main:
 int_hi:	org	0x0008	; high vector, no low vector
 	goto	Fan_PWM_Interrupt
 
-	;org	0x100		    ; Main code starts here at address 0x100
 setup:
 	call	GLCD_Setup
 	call	ADC_Setup
@@ -31,7 +30,6 @@ setup:
 	call	Collect_Initial_Temperature
 	call	Fan_PWM_Interrupt_Setup
 current_temperature:
-;	call	OnOff_Controller
 	call	KeyPad_check
 	call	Collect_and_Process_Temperature
 	call	P_Controller
