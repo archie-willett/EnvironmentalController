@@ -8,10 +8,10 @@ extrn	Convert_GoalTemp_Dec2Hex, GLCD_Print_Goal_Temperature
     
     
     
-psect	udata_acs   ; named variables in access ram
-counter:    ds 1    ; reserve one byte for a counter variable
-KeyPadVal:	ds 1   ; reserve 1 byte for variable
-delay_count:	ds 1    ; reserve one byte for counter in the delay routine
+psect	udata_acs
+counter:    ds 1   
+KeyPadVal:	ds 1   
+delay_count:	ds 1 
 KeyPad_checkbit: ds 1
 HH:	ds 1
 HL:	ds 1
@@ -23,7 +23,7 @@ KeyPad_delay: ds 1
 
 psect	udata_bank4 ; reserve data anywhere in RAM (here at 0x400)
 Array_InputTemperature:    ds 18 ; reserve 18 bytes for message data
-Array_Confirm:		   ds 26 ; reserve 18 bytes for message data
+Array_Confirm:		   ds 26 ; reserve 26 bytes for message data
 
 psect	data    
 	; ******* myTable, data in programme memory, and its length *****
@@ -76,8 +76,8 @@ KeyPad_Confirm_init:
 Confirm_message_read_loop: 	
 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
-	decfsz	counter, A		; count down to zero
-	bra	Confirm_message_read_loop		; keep going until finished
+	decfsz	counter, A			; count down to zero
+	bra	Confirm_message_read_loop	; keep going until finished
 	return
 	
 KeyPad_confirm:

@@ -24,7 +24,7 @@ adc_loop:
 	bra	adc_loop
 	
 	return
-
+ 
 end
 
 

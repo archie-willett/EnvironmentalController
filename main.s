@@ -14,7 +14,7 @@ psect	code, abs
 main:
 	org	0x0
 	goto	setup
-	org	0x100		    ; Main code starts here at address 0x100
+	org	0x100		    
 setup:
 	call	GLCD_Setup
 	call	ADC_Setup

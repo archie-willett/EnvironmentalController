@@ -4,8 +4,8 @@ global  UART_Setup, UART_Transmit_Message, UART_Send_Temperature
 global	UART_Transmit_Byte
 extrn	Convert_Hex_ASCII, TempVal_Dec_H, TempVal_Dec_L
 
-psect	udata_acs   ; reserve data space in access ram
-UART_counter: ds    1	    ; reserve 1 byte for variable UART_counter
+psect	udata_acs 
+UART_counter: ds    1	   
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 UART_hex_tmp:	    ds 1    ; reserve 1 byte for variable UART_hex_tmp
@@ -50,10 +50,6 @@ UART_Send_Temperature:
     call    UART_Transmit_Byte
     movf    TempVal_Dec_L, W, A
     call    UART_Write_Hex_Nib_Low
-;    movlw   0xBA
-;    call    UART_Transmit_Byte
-;    movlw   'C'
-;    call    UART_Transmit_Byte
     movlw   0x0D
     call    UART_Transmit_Byte
     movlw   0x0A

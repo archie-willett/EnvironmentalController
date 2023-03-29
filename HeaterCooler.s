@@ -6,7 +6,7 @@ global	Fan_PWM_Interrupt, P_Controller
 extrn	TempVal_Hex_H, TempVal_Hex_L, GoalTemp_Hex_H, GoalTemp_Hex_L
 extrn	H1, L1, H2, L2, res0, res1
 
-psect	udata_acs   ; named variables in access ram
+psect	udata_acs
 OnOff_Switch:	    ds 1 ; bit 0 - On/Off Controller
 Proportional_Bit:   ds 1
 Proportional_Bit_Interrupt:	ds 1
@@ -81,8 +81,8 @@ Controller_Off:
 	movff	GoalTemp_Hex_H, H1, A
 	movlw	OnOff_Threshold_Off
 	bra	Compare_Temp_vs_Goal
-Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - 1	    
-	subwf	L2, F, A	    ;On-Off when Temp > GoalTemp + 1
+Compare_Temp_vs_Goal:		    ;Off-On when Temp < GoalTemp - threshold	    
+	subwf	L2, F, A	    ;On-Off when Temp > GoalTemp + threshold
 	clrf	WREG, A
 	subwfb	H2, F, A
 	call	Subtraction_16bit

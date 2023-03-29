@@ -9,11 +9,11 @@ global	Collect_and_Process_Temperature, Collect_Initial_Temperature
 
 extrn	ADC_Read
 extrn	delay_x1ms
-extrn	GoalTemp_Dec_H, GoalTemp_Dec_L ; , Print
+extrn	GoalTemp_Dec_H, GoalTemp_Dec_L
 extrn	GLCD_Print_Goal_Temperature, GLCD_Current_Temperature
 
     
-psect	udata_acs   ; named variables in access ram
+psect	udata_acs
 U1:	ds 1
 H1:	ds 1
 L1:	ds 1
@@ -198,8 +198,6 @@ Calibrate:
 	call	Mult_16x16
 	movff	res2, TempVal_Hex_H, A
 	movff	res1, TempVal_Hex_L, A
-;	movlw	cal_offset_L
-;	subwfb	H1, F, A
 	return
 	
 Dec2Hex_Converter:
