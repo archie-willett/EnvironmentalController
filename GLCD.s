@@ -2,7 +2,7 @@
 
 global  GLCD_Setup, GLCD_Write_Data, GLCD_Tb, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 global	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt, GLCD_Bar
+global	GLCD_Space, GLCD_lE, GLCD_I, GLCD_M, GLCD_axis, GLCD_Tt
 global	GLCD_3,GLCD_0,GLCD_5,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 global	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_delay_x4us, GLCD_delay_ms
 global	GLCD_Update_Bars, GLCD_Update_Bars_Setup, GLCD_ct
@@ -343,8 +343,6 @@ GLCD_M:
 GLCD_axis:	
 	rlncf	GLCD_Axis_p1_W, F, A
 	rlncf	GLCD_Axis_p1_W, F, A
-	;rrncf	GLCD_Axis_p2_W, F, A
-	;rlncf	GLCD_Axis_p2_W, A
 	
 	movf	GLCD_Axis_p1_W, W, A
 	call	GLCD_Write_Data
@@ -352,11 +350,6 @@ GLCD_axis:
 	call	GLCD_Write_Data
 	movf	GLCD_Axis_p1_W, W, A
 	call	GLCD_Write_Data
-	
-;	movf	GLCD_Axis_p2, W, A
-;	call	GLCD_Write_Data
-;	movf	GLCD_Axis_p2, W, A
-;	call	GLCD_Write_Data
 	return
 	
 	
@@ -368,26 +361,26 @@ space_loop:
 	decfsz	GLCD_cnt_ms, A
 	bra	space_loop
 	return
-;GLCD_1:
-;	movlw	00010001B
-;	call	GLCD_Write_Data
-;	movlw	00011111B
-;	call	GLCD_Write_Data
-;	movlw	00010000B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
-;GLCD_2:
-;	movlw	00011101B
-;	call	GLCD_Write_Data
-;	movlw	00010101B
-;	call	GLCD_Write_Data
-;	movlw	00010111B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
+GLCD_1:
+	movlw	00010001B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010000B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
+GLCD_2:
+	movlw	00011101B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00010111B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
 GLCD_3:
 	movlw	01010001B
 	call	GLCD_Write_Data
@@ -398,16 +391,16 @@ GLCD_3:
 	movlw	01000000B
 	call	GLCD_Write_Data
 	return
-;GLCD_4:
-;	movlw	00000111B
-;	call	GLCD_Write_Data
-;	movlw	00000100B
-;	call	GLCD_Write_Data
-;	movlw	00011110B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
+GLCD_4:
+	movlw	00000111B
+	call	GLCD_Write_Data
+	movlw	00000100B
+	call	GLCD_Write_Data
+	movlw	00011110B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
 GLCD_5:	
 	movlw	01010111B
 	call	GLCD_Write_Data
@@ -418,46 +411,46 @@ GLCD_5:
 	movlw	00000000B
 	call	GLCD_Write_Data
 	return
-;GLCD_6:
-;	movlw	00011111B
-;	call	GLCD_Write_Data
-;	movlw	00010101B
-;	call	GLCD_Write_Data
-;	movlw	00011101B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
-;GLCD_7:
-;	movlw	00000001B
-;	call	GLCD_Write_Data
-;	movlw	00011001B
-;	call	GLCD_Write_Data
-;	movlw	00000111B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
-;GLCD_8:	
-;	movlw	00011111B
-;	call	GLCD_Write_Data
-;	movlw	00010101B
-;	call	GLCD_Write_Data
-;	movlw	00011111B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
-;GLCD_9:
-;	movlw	00000111B
-;	call	GLCD_Write_Data
-;	movlw	00000101B
-;	call	GLCD_Write_Data
-;	movlw	00011111B
-;	call	GLCD_Write_Data
-;	movlw	00000000B
-;	call	GLCD_Write_Data
-;	return
+GLCD_6:
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011101B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
+GLCD_7:
+	movlw	00000001B
+	call	GLCD_Write_Data
+	movlw	00011001B
+	call	GLCD_Write_Data
+	movlw	00000111B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
+GLCD_8:	
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00010101B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
+GLCD_9:
+	movlw	00000111B
+	call	GLCD_Write_Data
+	movlw	00000101B
+	call	GLCD_Write_Data
+	movlw	00011111B
+	call	GLCD_Write_Data
+	movlw	00000000B
+	call	GLCD_Write_Data
+	return
 GLCD_0:
 	movlw	11111000B
 	call	GLCD_Write_Data
@@ -511,16 +504,6 @@ GLCD_Print_Clear_Bar:
 	call	GLCD_Set_Page
 	call	GLCD_Clear_Bar_Page
 	bra	GLCD_Clear_Bar
-	
-;GLCD_Clear_Bar:
-;	decf	GLCD_comp_counter, A
-;	movf	GLCD_comp_counter, W, A
-;	call	GLCD_Set_Page
-;	movlw	1
-;	cpfsgt	GLCD_comp_counter, A
-;	bra	GLCD_Clear_Bar
-;	call	GLCD_Clear_Bar_Page
-;	return
 	
 GLCD_Compare:
 	movff	GLCD_loc, GLCD_bar_loc, A

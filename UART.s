@@ -5,7 +5,7 @@ global	UART_Transmit_Byte
 extrn	Convert_Hex_ASCII, TempVal_Dec_H, TempVal_Dec_L
 
 psect	udata_acs  
-UART_counter: ds    
+UART_counter: ds  1  
 
 PSECT	udata_acs_ovr,space=1,ovrld,class=COMRAM
 UART_hex_tmp:	    ds 1   

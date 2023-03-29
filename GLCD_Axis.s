@@ -1,7 +1,7 @@
 #include <xc.inc>
 extrn   GLCD_Setup, GLCD_Write_Data, GLCD_Tt, GLCD_m, GLCD_p, GLCD_Right, GLCD_c
 extrn	GLCD_Left, GLCD_Both, GLCD_Set_Y, GLCD_Set_Page, GLCD_Clear_Display
-extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb, GLCD_Bar
+extrn	GLCD_Space, GLCD_I, GLCD_lE, GLCD_M, GLCD_axis, GLCD_Tb
 extrn	GLCD_3,GLCD_0,GLCD_5,GLCD_1,GLCD_2,GLCD_4,GLCD_6,GLCD_7,GLCD_8,GLCD_9
 extrn	GLCD_Compare, GLCD_Full_Bar, GLCD_bc, GLCD_ct
  
